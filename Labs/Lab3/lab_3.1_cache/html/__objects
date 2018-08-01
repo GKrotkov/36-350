@@ -1,0 +1,14 @@
+unnamed-chunk-2	huber
+unnamed-chunk-3	huber
+unnamed-chunk-4	huber
+unnamed-chunk-5	huber
+unnamed-chunk-6	huber.vals	x.vals
+unnamed-chunk-7	get.wordtab.from.url	shakespeare.wordobj	url
+unnamed-chunk-8	finis	i	lastFinis	n	occurrence	shakespeare.lines	titles	titles.end	titles.start	toc.end	toc.start
+unnamed-chunk-9	i	section	shakespeare.lines.by.play
+unnamed-chunk-10	get.wordtab.from.lines
+unnamed-chunk-11	shakespeare.wordobj.by.play
+unnamed-chunk-12	longest.sorted	shakespeare.total.words.by.play	shakespeare.unique.words.by.play
+unnamed-chunk-13	get.wordtab.from.url
+unnamed-chunk-14	shakespeare.wordobj2	url
+unnamed-chunk-15	

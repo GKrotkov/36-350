@@ -1,0 +1,5 @@
+unnamed-chunk-2	cols.with.ab.zeros	zeros.per.column	colSums	my.mat	i.to.keep	a	b	return	as.matrix	mat	matrix	c	identity.mat	diag
+unnamed-chunk-3	list.extractor	is.null	i.to.keep	return	my.list	i.to.remove	cool.list	list	letters	sample	c
+unnamed-chunk-4	random.walk	is.null	seed	set.seed	x.vals	x.start	r	runif	tail	c	length	plot.walk	plot	return	list	num.steps
+unnamed-chunk-5	fibonacci	n	return	my.fib	c	i
+unnamed-chunk-6	sentence.flipper	str.words	strsplit	str	rev.words	vector	length	i	word.flipper	str.flipped	paste	return	chars	chars.flipped	rev

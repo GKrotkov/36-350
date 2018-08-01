@@ -1,0 +1,50 @@
+unnamed-chunk-2	set.seed
+unnamed-chunk-3	rbinom
+unnamed-chunk-4	bin.draws.0.5	rbinom	c
+unnamed-chunk-5	bin.draws.0.5	cat	c	length
+unnamed-chunk-6	factorial
+unnamed-chunk-7	mean	bin.draws.0.5	sd
+unnamed-chunk-8	summary	bin.draws.0.5
+unnamed-chunk-9	typeof	bin.draws.0.5	recastDraws	as.character	summary
+unnamed-chunk-10	hist	bin.draws.0.5
+unnamed-chunk-11	tabulate	bin.draws.0.5
+unnamed-chunk-12	plot	bin.draws.0.5
+unnamed-chunk-13	plot	bin.draws.0.5
+unnamed-chunk-14	mat	matrix	tmat
+unnamed-chunk-15	mat
+unnamed-chunk-16	example.list	list	c	T	F	tmat	names
+unnamed-chunk-17	class	example.list
+unnamed-chunk-18	pros.dat	as.matrix	read.table
+unnamed-chunk-19	dim	pros.dat	c
+unnamed-chunk-20	head	pros.dat	tail
+unnamed-chunk-21	colnames	pros.dat	rownames
+unnamed-chunk-22	pros.dat.sub	pros.dat	dim	head
+unnamed-chunk-23	log.cancer.density.single	pros.dat.sub	log.cancer.density.functions	log	exp	all.equal
+unnamed-chunk-24	pros.dat	cbind	log.cancer.density.single	head
+unnamed-chunk-25	hist	pros.dat.sub	plot
+unnamed-chunk-26	plot	pros.dat
+unnamed-chunk-27	hist	pros.dat	plot
+unnamed-chunk-28	pros.dat
+unnamed-chunk-29	has.svi	ifelse	pros.dat	T	F	sum
+unnamed-chunk-30	pros.dat.svi	pros.dat	has.svi	pros.dat.no.svi	head
+unnamed-chunk-31	pros.dat.svi.avg	colMeans	pros.dat.svi	c	pros.dat.no.svi.avg	pros.dat.no.svi	head
+unnamed-chunk-32	str	str2
+unnamed-chunk-33	tolower	c	toupper
+unnamed-chunk-34	presidents	c	first.letters	substr	first.letters.scrambled	sample	paste	nchar
+unnamed-chunk-35	phrase	substr	nchar
+unnamed-chunk-36	ingredients	split	strsplit	pasted	paste	final	names	table
+unnamed-chunk-37	url	shakespeare.lines	readLines	head	cat	length	max	nchar	mean	sum
+unnamed-chunk-38	shakespeare.lines
+unnamed-chunk-39	shakespeare.all	paste	shakespeare.lines	cat	nchar
+unnamed-chunk-40	shakespeare.words	strsplit	shakespeare.all	cat	length	shakespeare.words.unique	unique
+unnamed-chunk-41	hist	nchar	shakespeare.words.unique
+unnamed-chunk-42	set.seed	x	round	runif	sort	order
+unnamed-chunk-43	shakespeare.words.unique	order	nchar
+unnamed-chunk-44	shakespeare.wordtab	table	shakespeare.words	length
+unnamed-chunk-45	length	shakespeare.wordtab
+unnamed-chunk-46	shakespeare.wordtab.sorted	sort	shakespeare.wordtab
+unnamed-chunk-47	shakespeare.words	shakespeare.wordtab	table	shakespeare.wordtab.sorted	sort
+unnamed-chunk-48	shakespeare.words.new	strsplit	tolower	shakespeare.all	shakespeare.wordtab.new	table
+unnamed-chunk-49	length	shakespeare.words.new	shakespeare.words	shakespeare.wordtab.new	shakespeare.wordtab
+unnamed-chunk-50	shakespeare.words.new.unique	unique	shakespeare.words.new	hist	nchar	order
+unnamed-chunk-51	shakespeare.wordtab.sorted.new	sort	shakespeare.wordtab.new

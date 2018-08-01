@@ -1,0 +1,195 @@
+---
+title: "Lab 10: Plyr and Split-Apply-Combine"
+author: "Statistical Computing, 36-350"
+date: "Week of Friday July 27, 2018"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE)
+```
+
+Name: Gabriel Krotkov
+Andrew ID: gkrotkov
+Collaborated with:  
+
+This lab is to be done in class (completed outside of class if need be). You can collaborate with your classmates, but you must identify their names above, and you must submit **your own** lab as an knitted HTML file on Canvas, by Friday 10pm, this week.
+
+**This week's agenda**: practicing split-apply-combine, getting familiar with plyr functions.
+
+Strikes data set
+===
+
+Data on the political economy of strikes (from Bruce Western, in the Sociology Department at Harvard University) is up at https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/strikes.csv. The data features 18 countries of 35 years. The measured variables:
+
+- `country`, `year`: country and year of data collection
+- `strike.volume`: days on strike per 1000 workers
+- `unemployment`: unemployment rate
+- `inflation`: inflation rate
+- `left.parliament`: leftwing share of the goverment
+- `centralization`: centralization of unions
+- `density`: density of unions
+
+We read it into our R session below.
+
+```{r}
+strikes.df = 
+  read.csv("https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/strikes.csv")
+head(strikes.df, 3)
+```
+
+Splitting by country
+===
+
+- **1a.** Split `strikes.df` by country, using the `split()` function. Call the resulting list `strikes.by.country`, and display the names of elements the list, as well as the first 3 rows of the data frame for Canada.
+
+```{r}
+strikes.by.country <- split(strikes.df, strikes.df$country)
+
+names(strikes.by.country)
+
+head(strikes.by.country$Canada, 3)
+```
+
+- **1b.** Using `strikes.by.country` and `sapply()`, compute the average unemployment rate for each country. What country has the highest average unemployment rate? The lowest?
+
+```{r}
+mean_unemployment <- function(country){
+  return(mean(country$unemployment))
+}
+
+avg_unemployment <- sort(sapply(strikes.by.country, mean_unemployment))
+
+cat("The highest unemployment is of:", 
+    names(avg_unemployment)[length(avg_unemployment)], "\n")
+cat("The lowest unemployment is of:", 
+    names(avg_unemployment)[1], "\n")
+
+```
+
+- **1c.** Using `strikes.by.country` and `sapply()`, compute a summary (min, quartiles, max) of the unemployment rate for each country. Display the output matrix; do its dimensions make sense to you?
+
+```{r}
+get_fivenum <- function(country){
+  return(fivenum(country$unemployment))
+}
+
+fivenum_by_country <- sapply(strikes.by.country, get_fivenum)
+
+fivenum_by_country
+```
+
+Answer: The dimensions make sense, 18x5 since it's a five number summary.
+
+- **1d.** Using `strikes.by.country` and just one call to `sapply()`, compute the average unemployment rate, inflation rates, and strike volume for each country. The output should be a matrix of dimension 3 x 18; display it. **Challenge**: with just the one call to `sapply()`, figure out how to make the output matrix have appropriate row names (of your choosing).
+
+```{r}
+sapply(strikes.by.country, 
+       FUN = function(country){
+         result <- c(mean(country$unemployment), 
+                     mean(country$strike.volume), 
+                     mean(country$inflation))
+         names(result) <- c("Unemployment", "Strike Volume", "Inflation")
+         return(result)
+       })
+```
+
+Splitting by year
+===
+
+- **2a.** Using `split()` and `sapply()`, compute the average unemployment rate, inflation rates, and strike volume for each year in the `strikes.df` data set. The output should be a matrix of dimension 3 x 35; display the columns for 1960, 1977, 1980, 1985.
+
+```{r}
+strikes_by_year <- split(strikes.df, strikes.df$year)
+year_data <- sapply(strikes_by_year, 
+                    FUN = function(year){
+                      return(c(mean(year$unemployment), 
+                               mean(year$inflation),
+                               mean(year$strike.volume)))
+                    })
+
+year_data[,c("1960", "1977", "1980", "1985")]
+```
+
+- **2b.** Display the average unemployment rate by year and the average inflation rate by year, in the same plot. Label the axes and title the plot appropriately. Include an informative legend.  
+
+```{r}
+plot(colnames(year_data), year_data[1,], 
+     xlab = "Year", 
+     ylab = "Unemployment/Inflation", 
+     main = "Inflation and unemployment by year", 
+     col = "purple")
+points(colnames(year_data), year_data[2,], 
+       col = "green")
+legend("topleft", 
+       legend = c("Inflation", "Unemployment"),
+       col = c("green", "purple"),
+       fill = c("green", "purple"))
+```
+
+- **2c.** Using `split()` and `sapply()`, compute the average unemployment rate for each country, pre and post 1975. The output should be a numeric vector of length 36; display the first 5 entries. Hint: the hard part here is the splitting. There are several ways to do this. One way is as follows: define a new column (say) `yearPre1975` to be the indicator that the `year` column is less than or equal to 1975. Then define a new column (say) `countryPre1975` to be the string concatenation of the `country` and `yearPre1975` columns. Then split on `countryPre1975` and proceed as usual.
+
+```{r}
+strikes.df$yearPre1975 <- strikes.df$year <= 1975
+strikes.df$countryPre1975 <- paste(as.character(strikes.df$yearPre1975), 
+                                 as.character(strikes.df$country))
+
+strikes_era <- sapply(split(strikes.df, strikes.df$countryPre1975), 
+                             FUN = function(country){
+                               return(mean(country$unemployment))
+                               })
+
+head(strikes_era, 5)
+```
+
+- **2d.** Compute for each country the difference in average unemployment post and pre 1975. Which country had the biggest increase in average unemployment from pre to post 1975? The biggest decrease?
+
+```{r}
+n <- length(strikes_era)
+# Post minus pre
+unemployment_diff <- sort(strikes_era[1:(n/2)] - strikes_era[((n/2) + 1):n])
+unemployment_diff[1]
+unemployment_diff[n/2]
+```
+
+Plyr practice
+===
+
+- **3a.** Install the package `plyr` if you haven't done so already, and load it into your R session with `library(plyr)`.
+
+```{r}
+library(plyr)
+```
+
+- **3b.** Repeat Q1b, but now using an appropriate function from the `plyr` package to solve the question. Hint: you shouldn't have to use `strikes.by.country` at all, you should only need one call to `d*ply()` (where `*` is at your choosing).
+
+```{r}
+avg_unemployment <- daply(strikes.df, 
+                               .(country), 
+                               mean_unemployment)
+
+avg_unemployment <- sort(avg_unemployment)
+
+cat("The highest unemployment is of:", 
+    names(avg_unemployment)[length(avg_unemployment)], "\n")
+cat("The lowest unemployment is of:", 
+    names(avg_unemployment)[1], "\n")
+```
+
+- **3c.** Repeat Q1c, again using an appropriate `plyr` function. Hint: use `dlply()`. **Challenge**: using `daply()` or `ddply()` likely won't work. That is, if the `.fun` argument is a function that returns the output of `summary()` directly, then they won't work. Explain why. Then show how to fix this, and use them to produce an array or a data frame with the correct summary statistics for each country.
+
+```{r}
+fivenum_by_country_ply <- dlply(strikes.df, .(country), get_fivenum)
+fivenum_by_country_ply
+```
+
+- **3d.** Repeat Q2c, again using an appropriate `plyr` function. Hint: your solution should be particularly simple compared to your solution to Q2c, as you can just use a single call to `daply()` without creating any additional columns in `strikes.df`, like you did in Q2c. Also, remember that you can use `I()` to create indicator variables on-the-fly.
+
+```{r}
+avg_unemployment_3d <- daply(strikes.df, 
+                             .(country, I(year <= 1975)), 
+                             .fun = function(country){
+                               return(mean(country$unemployment))
+                               })
+
+avg_unemployment_3d
+```

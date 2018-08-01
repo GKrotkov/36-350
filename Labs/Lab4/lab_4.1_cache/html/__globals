@@ -1,0 +1,18 @@
+unnamed-chunk-2	pros.df	read.table	dim	head
+unnamed-chunk-3	pros.df.subset	subset	pros.df	lcp	min
+unnamed-chunk-4	pros.cor	cor	pros.df.subset	lower.tri	pros.cor.sorted	sort	abs	T	high_cor_ind	arrayInd	which	dim	pair	colnames	pros.df	cat
+unnamed-chunk-5	pros.lm	lm	lpsa	lcavol	pros.df	pros.subset.lm	pros.df.subset	coef
+unnamed-chunk-6	plot	pros.df	lcavol	lpsa	points	pros.df.subset	abline	pros.lm	pros.subset.lm	legend	c
+unnamed-chunk-7	url	exo.df	read.csv	head
+unnamed-chunk-8	exo.mat	as.matrix	exo.df	head
+unnamed-chunk-9	colSums	is.na	exo.mat
+unnamed-chunk-10	ind.clean	rowSums	is.na	exo.mat	exo.mat.clean	cat	nrow
+unnamed-chunk-11	exo.mat	c	ind.clean	rowSums	is.na	exo.mat.clean	cat	nrow
+unnamed-chunk-12	hist	exo.mat.clean
+unnamed-chunk-13	exo.mat.clean.log	log	exo.mat	colnames	paste
+unnamed-chunk-14	pairs	logpl_orbper	logpl_orbsmax	logst_mass	exo.mat.clean.log
+unnamed-chunk-15	idx	exo.mat.clean.log	log	idx_na	rowSums	is.na	exo.reg.data	as.data.frame	cat	anyNA	nrow
+unnamed-chunk-16	exo.lm	lm	logpl_orbper	logst_mass	logpl_orbsmax	exo.reg.data	exo.coef	coef
+unnamed-chunk-17	exo.lm	lm	pl_orbper	st_mass	pl_orbsmax	exo.reg.df	exo.coef	coef
+unnamed-chunk-18	summary	exo.lm
+unnamed-chunk-19	exo.fitted	fitted	exo.lm	exo.manualFit	exo.coef	exo.reg.data	names	cat	all.equal

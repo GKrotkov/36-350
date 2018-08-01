@@ -1,0 +1,14 @@
+unnamed-chunk-2	huber	abs	x	return
+unnamed-chunk-3	huber	abs	x	a	return
+unnamed-chunk-4	huber	abs	x	a	return
+unnamed-chunk-5	huber	return	ifelse	abs	x	a
+unnamed-chunk-6	x.vals	seq	huber.vals	c
+unnamed-chunk-7	get.wordtab.from.url	lines	readLines	str.url	text	paste	words	strsplit	split	tolower	keep.nums	grep	wordtab	table	return	list	length	sum	which.max	nchar	url	shakespeare.wordobj	head
+unnamed-chunk-8	shakespeare.lines	shakespeare.wordobj	lines	trimws	toc.start	which	toc.end	n	titles	vector	i	titles.start	occurrence	grep	titles.end	length	finis	lastFinis	c
+unnamed-chunk-9	shakespeare.lines.by.play	list	vector	n	i	section	titles.start	titles.end	shakespeare.lines	names
+unnamed-chunk-10	get.wordtab.from.lines	text	paste	lines	words	strsplit	split	tolower	keep.nums	grep	wordtab	table	return	list	length	sum	which.max	nchar
+unnamed-chunk-11	shakespeare.wordobj.by.play	lapply	shakespeare.lines.by.play	get.wordtab.from.lines
+unnamed-chunk-12	shakespeare.total.words.by.play	sapply	shakespeare.wordobj.by.play	shakespeare.unique.words.by.play	longest.sorted	sort	cat	head	tail
+unnamed-chunk-13	get.wordtab.from.url	lines	readLines	str.url	output	get.wordtab.from.lines	split	tolower	keep.nums	c	return
+unnamed-chunk-14	url	shakespeare.wordobj2	get.wordtab.from.url
+unnamed-chunk-15	all.equal	shakespeare.wordobj	shakespeare.wordobj2

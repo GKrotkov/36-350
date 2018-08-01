@@ -1,0 +1,173 @@
+---
+title: "Lab 11: Debugging and Testing"
+author: "Statistical Computing, 36-350"
+date: "Week of Monday July 30, 2018"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE)
+```
+
+Name: Gabriel Krotkov
+Andrew ID: gkrotkov
+Collaborated with: Steve Kim
+
+This lab is to be done in class (completed outside of class if need be). You can collaborate with your classmates, but you must identify their names above, and you must submit **your own** lab as an knitted HTML file on Canvas, by Tuesday 10pm, this week.
+
+**This week's agenda**: practicing debugging with `cat()`, `print()`, and `browser()`.
+
+Bug hunt practice
+===
+
+In this section of the lab, you will fix a bunch of buggy function definitions. Probably the easiest workflow is to define the function in your console, and then run the sample commands---they will either give errors or produce the wrong outputs. Using any combination of: reading the error messages, `traceback()`, and `cat()` or `print()`, you must find and fix the bugs. Sometimes it can also help to try multiple different inputs, i.e., try new function calls, rather than just looking at the sample calls given to you, in order to determine the bugs. You shouldn't show any of your debugging work in your final knitted answers---so, don't show calls to `traceback()`, and don't leave any `cat()` or `print()` calls in the final, fixed function. (You don't have to do anything yet, this was just to setup this section of the lab.)
+
+- **1a.** Below is a function called `get.cols.with.ab.zeros()`, but it has a few bugs. A few sample matrices are given below in `mat`, `identity.mat`, along with some sample calls that give errors. After fixing the bugs, the calls to `get.cols.with.ab.zeros()` should produce the outputs as described in comments.
+
+```{r}
+# Function: cols.with.ab.zeros, to retrieve columns of matrix that have between
+#   a and b zeros, each
+# Inputs:
+# - my.mat: the original matrix 
+# - a: lower bound for number of zeros allowed; default is 0
+# - b: upper bound for number of zeros allowed; default is Inf
+# Output: the new matrix
+
+cols.with.ab.zeros = function(my.mat, a=0, b=Inf) {
+  zeros.per.column = colSums(my.mat == 0)
+  i.to.keep = (a <= zeros.per.column) & (zeros.per.column <= b)
+  return(as.matrix(my.mat[,i.to.keep]))
+}
+
+mat = matrix(c(0,0,1,0,1,1,1,1,1), 3, 3)
+identity.mat = diag(1, 3)
+cols.with.ab.zeros(mat) # Should get back original matrix
+cols.with.ab.zeros(mat, a=1, b=2) # Should get back first 2 columns of mat
+cols.with.ab.zeros(mat, a=2, b=2) # Should get just 1st column of mat; note
+  # this should still be a matrix though, and not a numeric vector!
+cols.with.ab.zeros(identity.mat, a=2, b=2) # Should get back original matrix
+```
+
+- **1b.** Below is a function called `list.extractor()`, but it has a few bugs. A sample list is given below in `cool.list`, along with some sample calls that give errors. After fixing the bugs, the calls to `list.extractor()` should produce the outputs as described in comments.
+
+```{r, error = T}
+# Function: list.extractor, to extract elements of a list
+# Inputs:
+# - my.list: the original list 
+# - i.to.keep: vector of indices, corresponding to elements of the list we
+#   want to keep. Default is NULL, in which case this argument is ignored
+# - i.to.remove: vector of indices, corresponding to elements of the list we
+#   want to remove Default is NULL, in which case this argument is ignored.
+#   NOTE: if both i.to.keep and i.to.remove are non-NULL, then the first 
+#   one should take precedence (i.e., we don't remove anything)
+# Output: the new list
+
+list.extractor = function(my.list, i.to.keep=NULL, i.to.remove=NULL) {
+  if (!is.null(i.to.keep)) {
+    return(my.list[i.to.keep])
+  }
+  else if (!is.null(i.to.remove)) {
+    return(my.list[-i.to.remove])
+  }
+  return(my.list)
+}
+
+cool.list = list(ints=1:10, lets=letters[1:8], fracs=1:7/7,
+                 bools=sample(c(TRUE,FALSE), 5, replace=TRUE))
+list.extractor(cool.list, i.to.keep=c(1,3)) # Should get list with ints, fracs
+list.extractor(cool.list, i.to.remove=4) # Should get list without bools
+list.extractor(cool.list, i.to.keep=2:4, i.to.remove=4) # Should get list with
+  # lets, fracs, and bools (the i.to.remove argument should be ignored)
+```
+
+- **1c.** Below is a function called `random.walk()`, but introduced a few bugs along the way. Some sample calls are given below that produce errors. After fixing the bugs, the calls to `random.walk()` should produce the outputs as described in comments. 
+
+```{r, error = T}
+# Function: random.walk, to run a simple random walk over the reals, which
+#   terminates when it reaches 0
+# Inputs:
+# - x.start: starting position. Default is 5
+# - plot.walk: should the result be plotted? Default is TRUE
+# - seed: integer seed to pass to set.seed(). Default is NULL, which means
+#   effectively no seed is set
+# Output: a list with elements x.vals, the values visited by the random walk,
+#   and num.steps, the number of steps taken before termination
+
+random.walk = function(x.start=5, plot.walk=TRUE, seed=NULL) {
+  if (!is.null(seed)) set.seed(seed) # Set the seed, if we need to
+  x.vals = x.start
+  while (TRUE) {
+    r = runif(1, -2, 1)
+    if (tail(x.vals, 1) + r <= 0) break
+    else x.vals = c(x.vals, (x.vals[length(x.vals)]+r))
+  }
+  if (plot.walk == TRUE) 
+    plot(x.vals, xlab="Iteration", ylab="Random walk values", type="o")
+  return(list(x.vals=x.vals, num.steps=length(x.vals)))
+}
+
+random.walk(x.start=5, seed=3)$num.steps # Should print 8 (this is how many
+  # steps it took the random walk), and produce a plot
+random.walk(x.start=10, seed=7)$num.steps # Should print 14 (this is how many
+  # steps it took the random walk), and produce a plot
+random.walk(x.start=10, plot.walk=FALSE, seed=7)$num.steps # Should print 14 
+  # (this is how many steps it took the random walk), and not produce a plot
+```
+
+Browsing for bugs
+===
+
+- **2a.** Now that you've had good practice with it, use `browser()` to find and fix bugs in the function `fibonacci()` below. This function is supposed to generate the $n$th number in the Fibonacci sequence 1, 1, 2, 3, 5, 8, 13, 21, 34, ..., which begins with 1, 1, and where every number after this is the sum of the previous two. Describe what bugs you found, how you found them, and what you did to fix them. Once this is done, your function should be producing outputs on the test cases below that match those described in the comments.
+
+```{r, error = T}
+fibonacci = function(n) {
+  if(n <= 2){
+    return(1)
+  }
+  my.fib = c(1,1)
+  for (i in 2:(n)){
+    my.fib <- c(my.fib, my.fib[i] + my.fib[i - 1])
+  } 
+  return(my.fib[i])
+}
+
+fibonacci(1) # Should be 1
+fibonacci(2) # Should be 1
+fibonacci(3) # Should be 2
+fibonacci(5) # Should be 5
+fibonacci(9) # Should be 34
+```
+
+Bug fixing log:
+- Noticed that calling with `n = 1` results in going backwards from 2 to 1 in the for loop, which is undesirable. Found this simply by examination of the function. Fixed it by simply introducing a special case when `n <= 2`, returning 1.
+- Noticed that the method of modifying`my.fib` isn't going to work because it's accessing vector indices that do not exist, by examination and adjusted it to use the `c` function instead.
+- Noticed that we had an off-by-one error in the function by running the test cases. Fixed it by removing the `-1` from `n-1` in the loop definition.
+
+- **2b.** Use `browser()` to find and fix bugs in the functions `sentence.flipper()` and `word.flipper()` below. The first function is supposed to take a sentence, i.e., a single string composed of words separated by spaces, and flip each of the words (meaning reverse the order of their characters); the second function is used by the first, to take a single word and flip it (reverse the order of the characters). Describe what bugs you found, how you found them, and what you did to fix them. Once this is done, your function should be producing outputs on the test cases below that match those described in the comments.
+
+```{r}
+sentence.flipper = function(str) {
+  str.words = strsplit(str, split=" ")[[1]]
+  rev.words <- vector(length = length(str.words))
+  for (i in 1:length(str.words)){
+    rev.words[i] <- word.flipper(str.words[i])
+  }
+  str.flipped = paste(rev.words, collapse=" ")
+  return(str.flipped)
+}
+
+word.flipper = function(str) {
+  chars = strsplit(str, split="")[[1]]
+  chars.flipped = rev(chars)
+  str.flipped = paste(chars.flipped, collapse="")
+  return(str.flipped)
+}
+
+# Should be "eht kciuq nworb xof depmuj revo eht yzal god"
+sentence.flipper("the quick brown fox jumped over the lazy dog") 
+# Should be "ot eb ro on ot eb taht si eht noitseuq"
+sentence.flipper("to be or no to be that is the question") 
+```
+
+Bug fix log:
+- Started with `word.flipper`. Noticed by unit testing that it isn't actually flip the order of characters, and also that it returns a very funky style of output - the actual string of the list, because `strstring` returns a list and this wasn't accounted for in the code. So I simply added `[[1]]` to the `strsplit` call and it's all good.
+- First off, `sentence.flipper` has a similar problem with not respecting that `strsplit` returns a list. So I fixed that similarly, and changed the `lapply` call to be a `for` loop that simply stored the words individually. Probably a more elegant way to do this but it works fine. 

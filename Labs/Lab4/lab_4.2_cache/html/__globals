@@ -1,0 +1,13 @@
+unnamed-chunk-2	strikes.df	read.csv	head
+unnamed-chunk-3	strikes.by.country	split	strikes.df	country	names	head	Canada
+unnamed-chunk-4	mean_unemployment	return	mean	country	unemployment	avg_unemployment	sort	sapply	strikes.by.country	cat	names	length
+unnamed-chunk-5	get_fivenum	return	fivenum	country	unemployment	fivenum_by_country	sapply	strikes.by.country
+unnamed-chunk-6	sapply	strikes.by.country	result	c	mean	country	unemployment	strike.volume	inflation	names	return
+unnamed-chunk-7	strikes_by_year	split	strikes.df	year	year_data	sapply	return	c	mean	unemployment	inflation	strike.volume
+unnamed-chunk-8	plot	colnames	year_data	points	legend	c
+unnamed-chunk-9	strikes.df	yearPre1975	year	countryPre1975	paste	as.character	country	strikes_era	sapply	split	return	mean	unemployment	head
+unnamed-chunk-10	n	length	strikes_era	unemployment_diff	sort
+unnamed-chunk-11	library	plyr
+unnamed-chunk-12	avg_unemployment	daply	strikes.df	.	country	mean_unemployment	sort	cat	names	length
+unnamed-chunk-13	fivenum_by_country_ply	dlply	strikes.df	.	country	get_fivenum
+unnamed-chunk-14	avg_unemployment_3d	daply	strikes.df	.	country	I	year	return	mean	unemployment

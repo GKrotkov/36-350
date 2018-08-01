@@ -1,0 +1,18 @@
+unnamed-chunk-2	simulate.data	mu.nodrug	runif	n	drug	coeff	rexp	mu.drug	control	return	list
+unnamed-chunk-3	data1	simulate.data	data2	cat	head	drug	nodrug	mean	sd
+unnamed-chunk-4	simulate.difference	data	simulate.data	n	mu.drug	difference	mean	drug	nodrug	return
+unnamed-chunk-5	rep.sim.loop	is.null	seed	set.seed	sim.objs	vector	nreps	i	simulate.difference	n	mu.drug	return	rep.sim.wrapper	simulations	positives	sum	rep.sim	replicate
+unnamed-chunk-6	mu.drug	rep.sim
+unnamed-chunk-7	mu.drug	nVector	successes.by.n	vector	length	i	shift	rep.sim	minN	min	cat	plot
+unnamed-chunk-8	simulate.difference	iterator	min.cases	n	%%	data	simulate.data	mu.drug	difference	mean	drug	nodrug	i	return
+unnamed-chunk-9	count3a	rep.sim	cat
+unnamed-chunk-10	stopping.rule.threshold	mean	results	drug	no.drug	threshold
+unnamed-chunk-11	stopping.rule.ttest	results	t.test	drug.vector	no.drug.vector	p.value	alpha
+unnamed-chunk-12	simulate.difference	stopping.rule.ttest	iterator	min.cases	n	%%	data	simulate.data	mu.drug	difference	mean	drug	nodrug	i	stopping.rule	return
+unnamed-chunk-13	positives2a	rep.sim	cat
+unnamed-chunk-14	url	sprint.m.df	read.table	sprint.w.df
+unnamed-chunk-15	sprint.m.df	City.Date	paste	City	Date	sprint.w.df	head
+unnamed-chunk-16	remove.sprint.duplicates	observed	vector	nrow	sprint	result	data.frame	i	current	%in%	rbind	return	sprint.m.df	sprint.w.df	head
+unnamed-chunk-17	sprint.m.df	City.Date	%in%	sprint.w.df	City	Date	head
+unnamed-chunk-18	sprint.m.df.temp	sprint.m.df	order	City.Date	sprint.w.df.temp	sprint.w.df	c	sprint.df	cbind
+unnamed-chunk-19	sprint.df2	merge	sprint.m.df	sprint.w.df	c	all.equal	sprint.df

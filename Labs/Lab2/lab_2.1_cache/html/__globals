@@ -1,0 +1,14 @@
+unnamed-chunk-2	crime.df	data.frame	USArrests	state.region
+unnamed-chunk-3	nrow	crime.df	head	is.data.frame	is.matrix
+unnamed-chunk-4	crime.mat	as.matrix	crime.df	head	crime.mat.noregion
+unnamed-chunk-5	crime.df	crime.mat.noregion
+unnamed-chunk-6	crime.df	Murder	crime.mat.noregion
+unnamed-chunk-7	TotalCrime	rowSums	crime.df	c	cbind	head
+unnamed-chunk-8	crime.mat.noregion	cbind	TotalCrime	head
+unnamed-chunk-9	set.seed	lis	list	rnorm
+unnamed-chunk-10	mean.vector	vector	length	lis	i	mean
+unnamed-chunk-11	mean.vector2	sapply	lis	mean	all.equal	mean.vector
+unnamed-chunk-12	sd.list	lapply	lis	sd	sd.list2	vector	length	i	all.equal
+unnamed-chunk-13	max.vector	apply	crime.mat.noregion	max	max.vector2	vector	ncol	i	names	colnames	all.equal
+unnamed-chunk-14	min.vector	tapply	crime.df	Region	min	min.vector2	vector	length	levels	crime.region	split	i	names	as.array	all.equal
+unnamed-chunk-15	quant.mat	apply	crime.mat.noregion	quantile	probabilities	c	crime.df	Murder	quant.mat2	quant.mat3	matrix	length	ncol	colnames	vector	i	qtile	rownames	names	all.equal
