@@ -1,0 +1,28 @@
+unnamed-chunk-2	set.seed
+unnamed-chunk-3	x.vec	length	typeof	sum
+unnamed-chunk-4	x.mat	matrix	x.vec	dim	typeof	colSums	sum
+unnamed-chunk-5	x.mat	c	sum	%%
+unnamed-chunk-6	x.vecIf	ifelse	x.vec	%%	c	F	T	all.equal
+unnamed-chunk-7	x.list	list	rnorm	letters	sample	c
+unnamed-chunk-8	pros.dat	as.matrix	read.table
+unnamed-chunk-9	svi.index	has.svi	ifelse	pros.dat	T	F	pros.dat.svi	pros.dat.no.svi	dim	pros.dat.svi.avg	colMeans	pros.dat.no.svi.avg
+unnamed-chunk-10	pros.dat.svi.sd	vector	ncol	pros.dat	i	sd	pros.dat.svi
+unnamed-chunk-11	pros.dat.no.svi.sd	vector	ncol	pros.dat	i	sd	pros.dat.no.svi
+unnamed-chunk-12	pros.dat.no.svi.sd	vector	ncol	pros.dat	pros.dat.svi.sd	i	sd	pros.dat.no.svi	pros.dat.svi
+unnamed-chunk-13	magic.denom	c	pros.dat.denom	sqrt	pros.dat.svi.sd	nrow	pros.dat.svi	pros.dat.no.svi.sd	pros.dat.no.svi	all.equal	pros.dat.diff	pros.dat.svi.avg	pros.dat.no.svi.avg	pros.dat.t.stat
+unnamed-chunk-14	sx	pros.dat.svi.sd	sy	pros.dat.no.svi.sd	n	nrow	pros.dat.svi	m	pros.dat.no.svi	numerator	denominator	pros.dat.df
+unnamed-chunk-15	pt	x	v
+unnamed-chunk-16	pros.dat.p.val	pt	abs	pros.dat.t.stat	pros.dat.df	cat	min	sig.p.vals
+unnamed-chunk-17	t.test.obj	t.test	rnorm	names
+unnamed-chunk-18	pros.dat.p.val.master	vector	ncol	pros.dat	i	colnames	t.test	pros.dat.svi	pros.dat.no.svi	all.equal	pros.dat.p.val
+unnamed-chunk-19	shakespeare.lines	readLines
+unnamed-chunk-20	shakespeare.lines	trimws
+unnamed-chunk-21	toc.start	which	shakespeare.lines	toc.end
+unnamed-chunk-22	n	toc.end	toc.start	titles	vector	i	shakespeare.lines
+unnamed-chunk-23	titles.start	vector	n	occurrence	i	which	shakespeare.lines	titles
+unnamed-chunk-24	titles.end	vector	length	titles.start	finis	which	shakespeare.lines	lastFinis	c
+unnamed-chunk-25	grep	c
+unnamed-chunk-26	titles.start	vector	n	occurrence	i	grep	titles	shakespeare.lines	titles.end	length	finis	which	lastFinis	c
+unnamed-chunk-27	hamlet.title	hamlet.index	which	shakespeare.lines	titles.start	shakespeare.lines.hamlet	titles.end	romeo.title	romeo.index	shakespeare.lines.romeo
+unnamed-chunk-28	hamlet.all	paste	shakespeare.lines.hamlet	shakespeare.words.hamlet	strsplit	tolower	hamletBooleanVector	cat	length	unique	hamlet.words.unique	hist	nchar	order	hamlet.wordtab.sorted	sort	table	plot	as.numeric
+unnamed-chunk-29	romeo.all	paste	shakespeare.lines.romeo	shakespeare.words.romeo	strsplit	tolower	romeoBooleanVector	cat	length	unique	romeo.words.unique	shakespeare.words.hamlet	hist	nchar	order	romeo.wordtab.sorted	sort	table	plot	as.numeric

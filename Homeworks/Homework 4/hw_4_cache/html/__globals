@@ -1,0 +1,23 @@
+unnamed-chunk-2	url	wage.df	read.csv	cat	dim	c	head
+unnamed-chunk-3	cat	str	wage.df	par	c	i	ncol	is.factor	hist	as.numeric	paste	colnames
+unnamed-chunk-4	wage.lm	lm	wage	year	age	wage.df	coef	cat	summary
+unnamed-chunk-5	wage.sum	summary	wage.lm	startInd	nrow	coefficients	endInd	wage.se
+unnamed-chunk-6	plot	wage.lm
+unnamed-chunk-7	cat	predict	wage.lm	data.frame
+unnamed-chunk-8	wage.glm	glm	I	wage.df	wage	year	age	summary
+unnamed-chunk-9	wage.glm	glm	I	wage.df	wage	year	age	education	summary
+unnamed-chunk-10	wage.df	wage_indicator	as.numeric	wage	completion_mat	matrix	rownames	levels	education	colnames	c	i	nrow	level	sum	ncol	completion
+unnamed-chunk-11	wage.filtered	wage.df	completion	education	wage.glm.filtered	glm	wage	year	age	summary
+unnamed-chunk-12	url	debt.df	read.csv	cat	dim	c	head
+unnamed-chunk-13	library	plyr	avg_gdp_growth	return	mean	country	growth	head	daply	debt.df	.	Country	ddply	dlply
+unnamed-chunk-14	tapply	debt.df	growth	Country	mean
+unnamed-chunk-15	growth_by_year	daply	debt.df	.	Year	avg_gdp_growth	cat	c	plot	names
+unnamed-chunk-16	result	daply	debt.df	.	Year	Country	avg_gdp_growth	dim	head	tail
+unnamed-chunk-17	year_se	daply	debt.df	.	Year	return	sd	year	growth	sqrt	nrow	cat	c
+unnamed-chunk-18	plot	names	growth_by_year	c	min	max	year_se	segments	as.numeric
+unnamed-chunk-19	debt.df.france	debt.df	Country	cat	dim	c	head
+unnamed-chunk-20	debt.df.france	next.growth	vector	nrow	i	Year	growth	cat	ncol
+unnamed-chunk-21	concatenate_next_growth	df	next.growth	vector	nrow	i	Year	growth	return	debt.df	ddply	.	Country	head	tail
+unnamed-chunk-22	plot	debt.df	ratio	next.growth	debt.lm	lm	abline	cat	coef
+unnamed-chunk-23	plot	debt.df	growth	next.growth	growth.lm	lm	cat	coef	abline
+unnamed-chunk-24	debt.df	delta.growth	next.growth	growth	high.debt	ratio	tipping_point_lm	lm	coef

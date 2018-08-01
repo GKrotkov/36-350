@@ -1,0 +1,431 @@
+---
+title: "Homework 1.1: Indexing and Iteration and Text Manipulation"
+author: "Statistical Computing, 36-350"
+date: "Week of Monday July 2, 2018"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE)
+```
+
+Name: Gabriel Krotkov
+Andrew ID: gkrotkov
+Collaborated with:  
+
+On this homework, you can collaborate with your classmates, but you must identify their names above, and you must submit **your own** homework as an knitted HTML file on Canvas, by Monday 10pm, next week (July 9).
+
+```{r}
+## For reproducibility --- don't change this!
+set.seed(07022017)
+```
+
+Some R basics
+===
+
+- **1a.** Let's start easy by working through some R basics, just to brush up on them. Define a variable `x.vec` to contain the integers 1 through 100. Check that it has length 100. Report the data type being stored in `x.vec`. Add up the numbers in `x.vec`, by calling a built-in R function.
+
+```{r}
+x.vec <- 1:100
+#True if x.vec has length 100
+length(x.vec) == 100
+typeof(x.vec)
+sum(x.vec)
+```
+
+- **1b.** Convert `x.vec` into a matrix with 20 rows and 5 columns, and store this as `x.mat`. Here `x.mat` should be filled out in the default order (column major order). Check the dimensions of `x.mat`, and the data type as well. Compute the sums of each of the 5 columns of `x.mat`, by calling a built-in R function. Check (using a comparison operator) that the sum of column sums of `x.mat` equals the sum of `x.vec`.
+
+```{r}
+x.mat <- matrix(x.vec, 20, 5)
+dim(x.mat)
+typeof(x.mat)
+colSums(x.mat)
+sum(colSums(x.mat)) == sum(x.vec)
+```
+
+
+- **1c.** Extract and display rows 1, 5, and 17 of `x.mat`, with a single line of code. Answer the following questions, each with a single line of code: how many elements in row 2 of `x.mat` are larger than 40? How many elements in column 3 are in between 45 and 50? How many elements in column 5 are odd? Hint: take advantage of the `sum()` function applied to Boolean vectors.
+
+```{r}
+x.mat[c(1, 5, 17),]
+
+sum(x.mat[2,] >= 40)
+sum(x.mat[,3] > 45 & x.mat[,3] < 50)
+sum(x.mat[,5] %% 2 == 1)
+```
+
+Answer: 3 elements of row 2 are larger than 40. 4 elements of column 3 are between 45 and 50 (noninclusive), and 10 elements of column 5 are odd. 
+
+- **1d.** Using Boolean indexing, modify `x.vec` so that every even number in this vector is incremented by 10, and every odd number is left alone. This should require just a single line of code. Print out the result to the console. **Challenge**: show that `ifelse()` can be used to do the same thing, again using just a single line of code.
+
+```{r}
+#Putting ifelse first so that the next step doesn't modify x.vec
+x.vecIf <- ifelse(x.vec %% 2 == 0, x.vec + 10, x.vec)
+
+x.vec[c(F, T)] <- x.vec[c(F, T)] + 10
+
+all.equal(x.vec, x.vecIf)
+```
+
+- **1e.** Consider the list `x.list` created below. Complete the following tasks, each with a single line of code: extract all but the second element of `x.list`---seeking here a list as the final answer. Extract the first and third elements of `x.list`, then extract the second element of the resulting list---seeking here a vector as the final answer. Extract the second element of `x.list` as a vector, and then extract the first 10 elements of this vector---seeking here a vector as the final answer. Note: pay close attention to what is asked and use either single brackets `[ ]` or double brackets ``[[ ]]`` as appropriate.
+
+```{r}
+x.list = list(rnorm(6), letters,
+              sample(c(TRUE,FALSE),size=4,replace=TRUE))
+
+x.list[-2]
+
+x.list[c(1, 3)][[2]]
+
+x.list[[2]][1:10]
+```
+
+Prostate cancer data set
+===
+
+OK, moving along to more interesting things! We're going to look again, as in lab, at the prostate cancer data set: 9 variables measured on 97 men who have prostate cancer (from the book [The Elements of Statistical Learning](http://statweb.stanford.edu/~hastie/ElemStatLearn/)):
+
+1. `lpsa`: log PSA score
+2. `lcavol`: log cancer volume
+3. `lweight`: log prostate weight
+4. `age`: age of patient
+5. `lbph`: log of the amount of benign prostatic hyperplasia
+6. `svi`: seminal vesicle invasion
+7. `lcp`: log of capsular penetration
+8. `gleason`: Gleason score 
+9. ` pgg45`: percent of Gleason scores 4 or 5 
+
+To load this prostate cancer data set into your R session, and store it as a matrix `pros.dat`:
+
+```{r}
+pros.dat =
+  as.matrix(read.table("https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/pros.dat"))
+```
+
+Computing standard deviations using iteration
+===
+
+- **2a.** Using on-the-fly Boolean indexing, extract the rows of `pros.dat` that correspond to patients with SVI, and the rows that correspond to patients without it. Call the resulting matrices `pros.dat.svi` and `pros.dat.no.svi`, respectively. Display the dimensions of these matrices. Compute the column means of `pros.dat.svi` and `pros.dat.no.svi`, stored into vectors called `pros.dat.svi.avg` and `pros.dat.no.svi.avg`, respectively. For each matrix, this should require just a single call to a built-in R function. Display these column means.
+
+```{r}
+svi.index <- 5
+has.svi <- ifelse(pros.dat[,svi.index] == 1, T, F)
+pros.dat.svi <- pros.dat[has.svi,]
+pros.dat.no.svi <- pros.dat[!has.svi,]
+
+dim(pros.dat.svi)
+dim(pros.dat.no.svi)
+
+pros.dat.svi.avg <- colMeans(pros.dat.svi)
+pros.dat.no.svi.avg <- colMeans(pros.dat.no.svi)
+
+pros.dat.svi.avg
+pros.dat.no.svi.avg
+```
+
+- **2b.** Take a look at the starter code below. The first line defines an empty vector `pros.dat.svi.sd` of length `ncol(pros.dat)` (of length 9). The second line defines an index variable `i` and sets it equal to 1. Write a third line of code to compute the standard deviation of the `i`th column of `pros.dat.svi`, using a built-in R function, and store this value in the `i`th element of `pros.dat.svi.sd`. 
+
+```{r}
+pros.dat.svi.sd = vector(length=ncol(pros.dat))
+i = 1
+pros.dat.svi.sd[i] <- sd(pros.dat.svi[,i])
+```
+
+- **2c.** Repeat the calculation as in the previous question, but for patients without SVI. That is, produce three lines of code: the first should define an empty vector `pros.dat.no.svi.sd` of length `ncol(pros.dat)` (of length 9), the second should define an index variable `i` and set it equal to 1, and the third should fill the `i`th element of `pros.dat.no.svi.sd` with the standard deviation of the `i`th column of `pros.dat.no.svi`.
+
+```{r}
+pros.dat.no.svi.sd = vector(length = ncol(pros.dat))
+i = 1
+pros.dat.no.svi.sd[i] <- sd(pros.dat.no.svi[,i])
+```
+
+- **2d.** Write a `for()` loop to compute the standard deviations of the columns of `pros.dat.svi` and `pros.dat.no.svi`, and store the results in the vectors `pros.dat.svi.sd` and `pros.dat.no.svi.sd`, respectively, that were created above. Note: you should have a single `for()` loop here, not two for loops. And if it helps, consider breaking this task down into two steps: as the first step, write a `for()` loop that iterates an index variable `i` over the integers between 1 and the number of columns of `pros.dat` (don't just manually write 9 here, pull out the number of columns programmatically), with an empty body. As the second step, paste relevant pieces of your solution code from Q2b and Q2c into the body of the `for()` loop. Print out the resulting vectors `pros.dat.svi.sd` and `pros.dat.no.svi.sd` to the console. Comment, just briefly (informally), by visually inspecting these standard deviations and the means you computed in Q2a: which variables exhibit large differences in means between the SVI and non-SVI patients, relative to their standard deviations?
+
+```{r}
+pros.dat.no.svi.sd = vector(length = ncol(pros.dat))
+pros.dat.svi.sd = vector(length = ncol(pros.dat))
+for(i in 1:ncol(pros.dat)){
+  pros.dat.no.svi.sd[i] <- sd(pros.dat.no.svi[,i])
+  pros.dat.svi.sd[i] <- sd(pros.dat.svi[,i])
+}
+```
+
+Answer: Age and pgg45 have remarkably high standard deviations - pgg45 makes sense because it's basically categorical, and Age is widely distributed, such that a stDev of around 7.5 makes fine sense. SVI, of course, has a standard deviation of 0 for both vectors, because of how we separated them.
+
+Computing t-tests using vectorization
+===
+
+- **3a.** Recall that the **two-sample (unpaired) t-statistic** between data sets $X=(X_1,\ldots,X_n)$ and $Y=(Y_1,\ldots,Y_m)$ is:
+$$
+T = \frac{\bar{X} - \bar{Y}}{\sqrt{\frac{s_X^2}{n} + \frac{s_Y^2}{m}}},
+$$
+where $\bar{X}=\sum_{i=1}^n X_i/n$ is the sample mean of $X$, $s_X^2 = \sum_{i=1}^n (X_i-\bar{X})^2/(n-1)$ is the sample variance of $X$, and similarly for $\bar{Y}$ and $s_Y^2$. We will compute these t-statistics for all 9 variables in our data set, where $X$ will play the role of one of the variables for SVI patients, and $Y$ will play the role of this variable for non-SVI patients. Start by computing a vector of the denominators of the t-statistics, called `pros.dat.denom`, according to the formula above. Take advantage of vectorization; this calculation should require just a single line of code. Make sure not to include any hard constants (e.g., don't just manually write 21 here for $n$); as always, programmatically define all the relevant quantities. Check using `all.equal()` that your computed denominators match the "magic denominators" given below in `magic.denom`. Then compute a vector of t-statistics for the 9 variables in our data set, called `pros.dat.t.stat`, according to the formula above, and using `pros.dat.denom`. Again, take advantage of vectorization; this calculation should require just a single line of code. Print out the t-statistics to the console. 
+
+```{r}
+magic.denom = c(0.19092077, 0.08803179, 1.91148819, 0.34076326, 0.00000000,
+                0.25730390, 0.15441770, 6.30903678, 0.23021447)
+
+pros.dat.denom <- sqrt(((pros.dat.svi.sd ^ 2) / nrow(pros.dat.svi)) + 
+                         ((pros.dat.no.svi.sd ^ 2) / nrow(pros.dat.no.svi)))
+
+all.equal(magic.denom, pros.dat.denom)
+
+pros.dat.diff <- pros.dat.svi.avg - pros.dat.no.svi.avg
+
+pros.dat.t.stat <- pros.dat.diff / pros.dat.denom
+
+pros.dat.t.stat
+```
+
+- **3b.** Given data $X$ and $Y$ and the t-statistic $T$ as defined the last question, the **degrees of freedom** associated with $T$ is:
+$$
+\nu = \frac{(\frac{s_X^2}{n}+\frac{s_Y^2}{m})^2}{\frac{(\frac{s_X^2}{n})^2}{n-1} + 
+  \frac{(\frac{s_Y^2}{m})^2}{m-1}}.
+$$
+Compute the degrees of freedom associated with each of our 9 t-statistics (from our 9 variables), storing the result in a vector called `pros.dat.df`. This might look like a complicated calculation, but really, it's not too bad: it only involves arithmetic operators, and taking advantage of vectorization, the calculation should only require a single line of code. Hint: to simplify this line of code, it will help to first set short variable names for variables/quantities you will be using, as in `sx = pros.dat.svi.sd`, `n = nrow(pros.dat.svi)`, and so on. Print out these degrees of freedom values to the console.
+
+```{r}
+sx <- pros.dat.svi.sd
+sy <- pros.dat.no.svi.sd
+n = nrow(pros.dat.svi)
+m = nrow(pros.dat.no.svi)
+
+numerator <- (((sx ^ 2) / n) + ((sy ^ 2) / m)) ^ 2
+denominator <- ((((sx ^ 2) / n) ^ 2) / (n - 1)) + 
+                  ((((sy ^ 2) / m) ^ 2) / (m - 1))
+
+pros.dat.df <- numerator / denominator
+```
+
+
+- **3c.** The function `pt()` evaluates the distribution function of the t-distribution. E.g.,
+    ```{r, eval=FALSE}
+    pt(x, df=v, lower.tail=FALSE)
+    ```
+    returns the probability that a t-distributed random variable, with `v` degrees of freedom, exceeds the value `x`. Importantly, `pt()` is vectorized: if `x` is a vector, and so is `v`, then the above returns, in vector format: the probability that a t-distributed variate with `v[1]` degrees of freedom exceeds `x[1]`, the probability that a t-distributed variate with `v[2]` degrees of freedom exceeds `x[2]`, and so on. 
+
+    Call `pt()` as in the above line, but replace `x` by the absolute values of the t-statistics you computed for the 9 variables in our data set, and `v` by the degrees of freedom values associated with these t-statistics. Multiply the output by 2, and store it as a vector `pros.dat.p.val`. These are called **p-values** for the t-tests of mean difference between SVI and non-SVI patients, over the 9 variables in our data set. Print out the p-values to the console. Identify the variables for which the p-value is smaller than 0.05 (hence deemed to have a significant difference between SVI and non-SVI patients). Identify the variable with the smallest p-value (the most significant difference between SVI and non-SVI patients).
+
+```{r}
+pros.dat.p.val <- 2 * pt(abs(pros.dat.t.stat), 
+                         df = pros.dat.df, 
+                         lower.tail = FALSE)
+
+cat("Minimum p-value:", min(pros.dat.p.val, na.rm = TRUE), "\n")
+
+sig.p.vals <- pros.dat.p.val[pros.dat.p.val < 0.05]
+```
+
+Answer: The significant p values are for the variables `lcavol`, `lcp`, `gleason`, `pgg45`, and `lpsa`. The minimum p value is 4.579e-10, for the `lcp` variable. 
+
+Computing t-tests using iteration
+===
+
+- **4.** The function `t.test()` computes a two-sample (unpaired) t-test between two data sets. E.g., 
+    ```{r}
+    t.test.obj = t.test(x=rnorm(10), y=rnorm(10))
+    names(t.test.obj)
+    ```
+    computes a t-test between data sets `x=rnorm(10)` and `y=rnorm(10)` (here, just for the sake of example, these are just two sets of 10 randomly generated standard normals), and stores the output in a list called `t.test.obj`. The names of the list are then displayed. Note: the element named `p.value` contains the p-value. 
+
+    Define an empty vector of length `ncol(pros.dat)` (of length 9) called `pros.dat.p.val.master`. Then write a `for()` loop to populate its entries with the p-values from calling `t.test()` to test the mean difference between SVI and non-SVI patients, over each of the 9 variables in our data set. Important: the `t.test()` function will throw an error when it tries to consider the mean difference in the *SVI variable itself*, across the two groups of SVI patients and non-SVI patients; this will occur at some value of `i` (i.e., the value for which  `pros.dat[,i]` is the SVI column). To avoid this error, use an `if()` statement to check if the current variable being considered is SVI, and in this case, just set the p-value equal to `NaN` (rather than calling `t.test()`). Check using `all.equal()` that the p-values stored in `pros.dat.p.val.master` match the ones you computed in Q3c. Note: use `check.names=FALSE` as a third argument to `all.equal()`, which instructs it to ignore the names of its first two arguments.
+
+```{r}
+pros.dat.p.val.master <- vector(length = ncol(pros.dat))
+
+for (i in 1:ncol(pros.dat)){
+  if(colnames(pros.dat)[i] == "svi"){
+    pros.dat.p.val.master[i] <- NaN
+  }
+  else{
+    pros.dat.p.val.master[i] <- t.test(x = pros.dat.svi[,i], 
+                                       y = pros.dat.no.svi[,i])[["p.value"]]
+  }
+}
+
+all.equal(pros.dat.p.val, pros.dat.p.val.master, 
+          check.names = FALSE)
+```
+
+Shakespeare's complete works
+===
+
+On to the more fun stuff! As in lab, we're going to look at [William Shakespeare's](https://en.wikipedia.org/wiki/William_Shakespeare) complete works, taken from [Project Gutenberg](http://www.gutenberg.org). The Shakespeare data file is up on our course website, and to load it into your R session, as a string vector called `shakespeare.lines`: 
+
+```{r}
+shakespeare.lines =
+  readLines("https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/shakespeare.txt")
+```
+
+Where are Shakespeare's plays, in this massive text?
+===
+
+- **5a.** Some lines in `shakespeare.lines` are empty, i.e., they are just equal to "". How many such lines are there? Remove all empty lines from `shakespeare.lines`. Also, trim all "extra" white space characters in the lines of `shakespeare.lines` using the `trimws()` function. Note: if you are unsure about what `trimws()` does, try it out on some simple strings/some simple vectors of strings.
+
+```{r}
+shakespeare.lines <- shakespeare.lines[shakespeare.lines != ""]
+shakespeare.lines <- trimws(shakespeare.lines)
+```
+
+- **5b.** Visit https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/shakespeare.txt in your web browser and just skim through this text file. Near the top you'll see a table of contents. Note that "THE SONNETS" is the first play, and "VENUS AND ADONIS" is the last. Using `which()`, find the indices of the lines in `shakespeare.lines` that equal "THE SONNETS", report the index of the *first* such occurence, and store it as `toc.start`. Similarly, find the indices of the lines in `shakespeare.lines` that equal "VENUS AND ADONIS", report the index of the *first* such occurence, and store it as `toc.end`.
+
+```{r}
+toc.start <- which(shakespeare.lines == "THE SONNETS")[1]
+toc.end <- which(shakespeare.lines == "VENUS AND ADONIS")[1]
+```
+
+- **5c.** Define `n = toc.end - toc.start + 1`, and create an empty string vector of length `n` called `titles`. Using a `for()` loop, populate `titles` with the titles of Shakespeare's plays as ordered in the table of contents list, with the first being "THE SONNETS", and the last being "VENUS AND ADONIS". Print out the resulting `titles` vector to the console. Hint: if you define the counter variable `i` in your `for()` loop to run between 1 and `n`, then you will have to index `shakespeare.lines` carefully to extract the correct titles. Think about the following. When `i=1`, you want to extract the title of the first play in `shakespeare.lines`, which is located at index `toc.start`. When `i=2`, you want to extract the title of the second play, which is located at index `toc.start + 1`. And so on.
+
+```{r}
+n = toc.end - toc.start + 1
+titles <- vector(length = n)
+
+for (i in 1:(n)){
+  titles[i] <- shakespeare.lines[toc.start + i - 1]
+}
+```
+
+- **5d.** Use a `for()` loop to find out, for each play, the index of the line in `shakespeare.lines` at which this play begins. It turns out that the *second* occurence of "THE SONNETS" in `shakespeare.lines` is where this play actually begins (this first ocurrence is in the table of contents), and so on, for each play title. Use your `for()` loop to fill out an integer vector called `titles.start`, containing the indices at which each of Shakespeare's plays begins in `shakespeare.lines`. Print the resulting vector `titles.start` to the console.
+
+```{r}
+titles.start <- vector(length = n)
+occurrence <- 2
+for (i in 1:n){
+  titles.start[i] <- which(shakespeare.lines == titles[i])[occurrence]
+}
+titles.start
+```
+
+- **5e.** Define `titles.end` to be an integer vector of the same length as `titles.start`, whose first element is the second element in `titles.start` minus 1, whose second element is the third element in `titles.start` minus 1, and so on. What this means: we are considering the line before the second play begins to be the last line of the first play, and so on. Define the last element in `titles.end` to be the length of `shakespeare.lines`. You can solve this question either with a `for()` loop, or with proper indexing and vectorization. **Challenge**: it's not really correct to set the last element in `titles.end` to be length of `shakespeare.lines`, because there is a footer at the end of the Shakespeare data file. By looking at the data file visually in your web browser, come up with a way to programmatically determine the index of the last line of the last play, and implement it.
+
+```{r}
+titles.end <- vector(length = length(titles.start))
+#Detect the end of the last piece via all instances of "FINIS"
+finis <- which(shakespeare.lines == "FINIS")
+lastFinis <- finis[length(finis)]
+#Set titles.end to be start without the first index, adding the last FINIS. 
+titles.end <- c(titles.start[2:length(titles.start)], lastFinis)
+```
+
+- **5f.** In Q5d, you should have seen that the starting index of Shakespeare's 38th play "THE TWO NOBLE KINSMEN" was computed to be `NA`, in the vector `titles.start`. Why? If you run `which(shakespeare.lines == "THE TWO NOBLE KINSMEN")` in your console, you will see that there is only one occurence of "THE TWO NOBLE KINSMEN" in `shakespeare.lines`, and this occurs in the table of contents. So there was no second occurence, hence the resulting `NA` value.
+
+    But now take a look at line 118,463 in `shakespeare.lines`: you will see that it is "THE TWO NOBLE KINSMEN:", so this is really where the second play starts, but because of colon ":" at the end of the string, this doesn't exactly match the title "THE TWO NOBLE KINSMEN", as we were looking for. The advantage of using the `grep()` function, versus checking for exact equality of strings, is that `grep()` allows us to match substrings. Specifically, `grep()` returns the indices of the strings in a vector for which a substring match occurs, e.g.,
+    ```{r}
+    grep(pattern="cat",
+         x=c("cat", "canned goods", "batman", "catastrophe", "tomcat"))
+    ```
+    so we can see that in this example, `grep()` was able to find substring matches to "cat" in the first, fourth, and fifth strings in the argument `x`. Redefine `titles.start` by repeating the logic in your solution to Q5d, but replacing the `which()` command in the body of your `for()` loop with an appropriate call to `grep()`. Also, redefine `titles.end` by repeating the logic in your solution to Q5e. Print out the new vectors `titles.start` and `titles.end` to the console---they should be free of `NA` values.
+
+```{r}
+titles.start <- vector(length = n)
+occurrence <- 2
+for (i in 1:n){
+  titles.start[i] <- grep(pattern = titles[i], 
+                          x = shakespeare.lines)[occurrence]
+}
+
+titles.end <- vector(length = length(titles.start))
+#Detect the end of the last piece via all instances of "FINIS"
+finis <- which(shakespeare.lines == "FINIS")
+lastFinis <- finis[length(finis)]
+#Set titles.end to be start without the first index, adding the last FINIS. 
+titles.end <- c(titles.start[2:length(titles.start)], lastFinis)
+
+titles.start
+titles.end
+```
+
+
+Extracting and analysing a couple of plays
+===
+
+- **6a.** Let's look at two of Shakespeare's most famous tragedies. Programmatically find the index at which "THE TRAGEDY OF HAMLET, PRINCE OF DENMARK" occurs in the `titles` vector. Use this to find the indices at which this play starts and ends, in the `titles.start` and `titles.end` vectors, respectively. Call the lines of text corresponding to this play `shakespeare.lines.hamlet`. How many such lines are there? Do the same, but now for the play "THE TRAGEDY OF ROMEO AND JULIET", and call the lines of text corresponding to this play `shakespeare.lines.romeo`. How many such lines are there?
+
+```{r}
+hamlet.title <- "THE TRAGEDY OF HAMLET, PRINCE OF DENMARK"
+hamlet.index <- which(shakespeare.lines[titles.start] == hamlet.title)
+shakespeare.lines.hamlet <- 
+  shakespeare.lines[titles.start[hamlet.index]:titles.end[hamlet.index]]
+
+romeo.title <- "THE TRAGEDY OF ROMEO AND JULIET"
+romeo.index <- which(shakespeare.lines[titles.start] == romeo.title)
+shakespeare.lines.romeo <-
+  shakespeare.lines[titles.start[romeo.index]:titles.end[romeo.index]]
+```
+
+- **6b.** Repeat the analysis, outlined in Q10a of Lab 1, on `shakespeare.lines.hamlet`. That is:
+      * collapse `shakespeare.lines.hamlet` into one big string, separated by spaces;
+      * convert this string into all lower case characters;
+      * divide this string into words, by splitting on spaces or on punctuation marks, using `split="[[:space:]]|[[:punct:]]"` in the call to `strsplit()`;
+      * remove all empty words (equal to the empty string ""), and report how many words remain;
+      * compute the unique words, report the number of unique words, and plot a histogram of their numbers of characters;
+      * report the 5 longest words;
+      * compute a word table, and report the 25 most common words and their counts;
+      * finally, produce a plot of the word counts verus rank.
+  
+```{r}
+hamlet.all <- paste(shakespeare.lines.hamlet, collapse = " ")
+
+shakespeare.words.hamlet <- strsplit(tolower(hamlet.all), 
+                              split = "[[:space:]]|[[:punct:]]")[[1]]
+
+hamletBooleanVector <- shakespeare.words.hamlet != ""
+shakespeare.words.hamlet <- shakespeare.words.hamlet[hamletBooleanVector]
+
+cat("Number of words:", length(shakespeare.words.hamlet), "\n")
+cat("Number of unique words:", 
+    length(unique(shakespeare.words.hamlet)), 
+    "\n")
+
+hamlet.words.unique <- unique(shakespeare.words.hamlet)
+
+hist(nchar(hamlet.words.unique))
+
+hamlet.words.unique[order(nchar(hamlet.words.unique), 
+                          decreasing = TRUE)][1:5]
+
+hamlet.wordtab.sorted <- sort(table(shakespeare.words.hamlet), 
+                              decreasing = TRUE)
+
+hamlet.wordtab.sorted[1:25]
+
+plot(x = as.numeric(hamlet.wordtab.sorted), 
+     y = 1:length(hamlet.wordtab.sorted), 
+     xlab = "Word Rank", 
+     ylab = "Frequency")
+```
+
+- **6c.** Repeat the same task as in Q6b, but on `shakespeare.lines.romeo`. Comment on any similarities/differences you see in the answers.
+
+```{r}
+romeo.all <- paste(shakespeare.lines.romeo, collapse = " ")
+
+shakespeare.words.romeo <- strsplit(tolower(romeo.all), 
+                              split = "[[:space:]]|[[:punct:]]")[[1]]
+
+romeoBooleanVector <- shakespeare.words.romeo != ""
+shakespeare.words.romeo <- shakespeare.words.romeo[romeoBooleanVector]
+
+cat("Number of words:", length(shakespeare.words.romeo), "\n")
+cat("Number of unique words:", 
+    length(unique(shakespeare.words.romeo)), 
+    "\n")
+
+romeo.words.unique <- unique(shakespeare.words.hamlet)
+
+hist(nchar(romeo.words.unique))
+
+romeo.words.unique[order(nchar(romeo.words.unique), 
+                          decreasing = TRUE)][1:5]
+
+romeo.wordtab.sorted <- sort(table(shakespeare.words.romeo), 
+                              decreasing = TRUE)
+
+romeo.wordtab.sorted[1:25]
+
+plot(x = as.numeric(romeo.wordtab.sorted), 
+     y = 1:length(romeo.wordtab.sorted), 
+     xlab = "Word Rank", 
+     ylab = "Frequency")
+```
+
+Answer: The shapes of the histogram of word lengths and the plot of frequency versus word rank are remarkably similar (Zipf's law seems to hold). Only the scales differ, but this makes some sense based on the length of the pieces. 

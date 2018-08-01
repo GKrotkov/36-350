@@ -1,0 +1,28 @@
+unnamed-chunk-2	.Random.seed
+unnamed-chunk-3	x.vec
+unnamed-chunk-4	x.mat
+unnamed-chunk-5	
+unnamed-chunk-6	x.vec	x.vecIf
+unnamed-chunk-7	x.list
+unnamed-chunk-8	pros.dat
+unnamed-chunk-9	has.svi	pros.dat.no.svi	pros.dat.no.svi.avg	pros.dat.svi	pros.dat.svi.avg	svi.index
+unnamed-chunk-10	i	pros.dat.svi.sd
+unnamed-chunk-11	i	pros.dat.no.svi.sd
+unnamed-chunk-12	i	pros.dat.no.svi.sd	pros.dat.svi.sd
+unnamed-chunk-13	magic.denom	pros.dat.denom	pros.dat.diff	pros.dat.t.stat
+unnamed-chunk-14	denominator	m	n	numerator	pros.dat.df	sx	sy
+unnamed-chunk-15	
+unnamed-chunk-16	pros.dat.p.val	sig.p.vals
+unnamed-chunk-17	t.test.obj
+unnamed-chunk-18	i	pros.dat.p.val.master
+unnamed-chunk-19	shakespeare.lines
+unnamed-chunk-20	shakespeare.lines
+unnamed-chunk-21	toc.end	toc.start
+unnamed-chunk-22	i	n	titles
+unnamed-chunk-23	i	occurrence	titles.start
+unnamed-chunk-24	finis	lastFinis	titles.end
+unnamed-chunk-25	
+unnamed-chunk-26	finis	i	lastFinis	occurrence	titles.end	titles.start
+unnamed-chunk-27	hamlet.index	hamlet.title	romeo.index	romeo.title	shakespeare.lines.hamlet	shakespeare.lines.romeo
+unnamed-chunk-28	hamlet.all	hamlet.words.unique	hamlet.wordtab.sorted	hamletBooleanVector	shakespeare.words.hamlet
+unnamed-chunk-29	romeo.all	romeo.words.unique	romeo.wordtab.sorted	romeoBooleanVector	shakespeare.words.romeo

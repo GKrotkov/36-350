@@ -1,0 +1,24 @@
+unnamed-chunk-2	huber	x.squared	x	ifelse	abs	a
+unnamed-chunk-3	a	huber
+unnamed-chunk-4	huber.sloppy	ifelse	abs	x	a
+unnamed-chunk-5	a	huber	x
+unnamed-chunk-6	huber	b
+unnamed-chunk-7	plot	x	seq	sin	cos	exp	log
+unnamed-chunk-8	func	foo
+unnamed-chunk-9	bt_compete	z1	z2	return	probs	c	sample	times
+unnamed-chunk-10	test1	bt_compete	test2	test3	test4	test5	tolerance	all.equal	sum	is.null
+unnamed-chunk-11	bt_tournament	seq_along	scores	n_left	length	stopifnot	bitwAnd	names	ii	seq_len	winner	bt_compete	winner_index	return
+unnamed-chunk-12	n	scores	rgamma	sort	results	replicate	bt_tournament
+unnamed-chunk-13	seed.counts	vector	n	names	i	sum	results	oneseed	cat	plot	scores
+unnamed-chunk-14	tournament_order	n	length	scores	stopifnot	bitwAnd	seeding	c	new_seeding	rep	return	order
+unnamed-chunk-15	worst_order	return	order	scores
+unnamed-chunk-16	default.drug	return	coeff	rnorm	n	mean	sd	default.nodrug	simulate.data	drug	drug.dist	control	nodrug.dist	list	data1	cat	nodrug
+unnamed-chunk-17	stopping.rule.ttest	results	t.test	drug.vector	no.drug.vector	return	p.value	alpha	stopping.rule.adaptive	exp	length	stoppingt	data1	drug	nodrug	stoppingadaptive	cat
+unnamed-chunk-18	simulate.difference	stopping.rule.ttest	default.drug	default.nodrug	iterator	min.cases	n	%%	data	simulate.data	mu.drug	drug.dist	nodrug.dist	difference	mean	drug	nodrug	i	stopping.rule	return	list	cat
+unnamed-chunk-19	rep.sim	default.drug	default.nodrug	stopping.rule.ttest	is.null	seed	set.seed	results	replicate	nreps	simulate.difference	n	drug.distr	nodrug.distr	stopping.rule	samples	sapply	identity	return	list	table	mean	cat
+unnamed-chunk-20	cat	rep.sim	stopping.rule.adaptive	default.drug
+unnamed-chunk-21	url	colnames	c	pa.names	read.table	head
+unnamed-chunk-22	url	colnames	c	nc.names	read.table	head
+unnamed-chunk-23	pa.names	id	paste	Gender	Name	Year	nc.names	names	all_names	unique	c	pa.additions	data.frame	%in%	countsVector	rep	nrow	cbind	rbind	nc.additions	order	manual.merge	substr	nchar	rownames
+unnamed-chunk-24	merge.merged	merge	pa.names	nc.names	c	is.na	Gender	substr	id	Name	nchar	Year
+unnamed-chunk-25	result	all.equal	manual.merge	merge.merged	cat

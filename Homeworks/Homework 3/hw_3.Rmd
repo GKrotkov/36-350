@@ -1,0 +1,680 @@
+---
+title: "Homework 5: Functions"
+author: "Statistical Computing, 36-350"
+date: "Week of Monday July 16, 2018"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE)
+```
+
+Name: Gabriel Krotkov
+Andrew ID: gkrotkov
+Collaborated with: Steve Kim 
+
+On this homework, you can collaborate with your classmates, but you must identify their names above, and you must submit **your own** homework as an knitted HTML file on Canvas, by Tuesday 10pm, next week (July 24th).
+
+Huber loss function
+===
+
+Recall, as covered in lab, the Huber loss function (or just Huber function, for short), with cutoff $a$, which is defined as:
+$$
+\psi_a(x) = \begin{cases}
+x^2 & \text{if $|x| \leq a$} \\
+2a|x| - a^2 & \text{if $|x| > a$} 
+\end{cases}
+$$
+This function is quadratic on the interval $[-a,a]$, and linear outside of this interval. It transitions from quadratic to linear "smoothly", and looks like this (when $a=1$):  
+![](https://raw.githubusercontent.com/linnylin92/36-350_public/master/pic/huber.png)  
+
+Exploring function environments
+===
+
+- **1a.** A modified version of the Huber function is given below. You can see that we've defined the variable `x.squared` in the body of the function to be the square of the input argument `x`. In a separate line of code (outside of the function definition), define the variable `x.squared` to be equal to 999. Then call `huber(x=3)`, and display the value of `x.squared`. What is its value? Is this affected by the function call `huber(x=3)`? It shouldn't be! Reiterate this point with several more lines of code, in which you repeatedly define `x.squared` to be something different (even something nonnumeric, like a string), and then call `huber(x=3)`, and demonstrate afterwards that the value of `x.squared` hasn't changed.
+
+
+```{r}
+huber = function(x, a=1) {
+  x.squared = x^2
+  ifelse(abs(x) <= a, x.squared, 2*a*abs(x)-a^2)
+}
+
+x.squared <- 999
+huber(x = 3)
+x.squared
+
+x.squared <- 10
+huber(x = 1)
+x.squared
+
+x.squared <- TRUE
+huber(x = 10)
+x.squared
+```
+
+
+- **1b.** Similar to the last question, define the variable `a` to be equal to -59.6, then call `huber(x=3, a=2)`, and show that the value of `a` after this function call is unchanged. And repeat a few times with different assignments for the variable `a`, to reiterate this point.
+
+```{r}
+a <- -59.6
+huber(x = 3, a = 2)
+a
+
+a <- FALSE
+huber(x = 3, a = 2)
+a
+
+a <- 1712
+huber(x = 3, a = 2)
+a
+
+a <- "string!!!!!!"
+huber(x = 3, a = 2)
+a
+```
+
+- **1c.** The previous two questions showed you that a function's body has its own environment in which locally defined variables, like those defined in the body itself, or those defined through inputs to the function, take priority over those defined outside of the function. However, when a variable referred to the body of a function is *not defined in the local environment*, the default is to look for it in the global environment (outside of the function).
+
+    Below is a "sloppy" implementation of the Huber function called `huber.sloppy()`, in which the cutoff `a` is not passed as an argument to the function. In a separate line of code (outside of the function definition), define `a` to be equal to 1.5 and then call `huber.sloppy(x=3)`. What is the output? Explain. Repeat this a few times, by defining `a` and then calling `huber.sloppy(x=3)`, to show that the value of `a` does indeed affect the function's ouptut as expected. **Challenge**: try setting `a` equal to a string and calling `huber.sloppy(x=3)`; can you explain what is happening?
+
+```{r}
+huber.sloppy = function(x) {
+  ifelse(abs(x) <= a, x^2, 2*a*abs(x)-a^2)
+}
+
+a <- 1.5
+huber.sloppy(x = 3)
+
+a <- 3 
+huber.sloppy(x = 3)
+
+a <- 2
+huber.sloppy(x = 3)
+
+a <- "foo"
+huber.sloppy(x = 3)
+```
+
+Answer: In each case, since `huber.sloppy` does not have access to a local `a` it finds the `a` in the global environment. Since I change `a` periodically, the output changes. When I enter a string into `huber.sloppy`, `abs(x) <= a` evaluates to `TRUE` because all integers are less than any string (similarly, all booleans are less than any string.)
+
+- **1d.** At last, a difference between `=` and `<-`, explained! Many of you have asked about this. The equal sign `=` and assignment operator `<-` are often used interchangeably in R, and some people will often say that a choice between the two is mostly a matter of stylistic taste. This is not the full story. Indeed, `=` and `<-` behave very differently when used to set input arguments in a function call. As we showed above, setting, say, `a=5` as the input to `huber()` has no effect on the global assignment for `a`. However, replacing `a=5` with `a<-5` in the call to `huber()` is entirely different in terms of its effect on `a`. Demonstrate this, and explain what you are seeing in terms of global assignment.
+
+```{r}
+a = 3
+huber(x = 3, a = 5)
+a
+
+huber(x <- 3, a <- 5)
+x
+a
+```
+
+Answer: When the `<-` operator is used in parameter assignment for a function, not only does the variable get set in the local function environment, but also in the global environment. In the first three lines of my demonstration normal behavior occurs, and `a` does not change when it is returned after the first call to `huber`. However, in the next block, I used the `<-` operator for parameter assignment, and not only does `a` get set by it globally, but also `x`!
+
+- **1e.** The story now gets even more subtle. It turns out that the assignment operator `<-` allows us to define new global variables even when we are specifying inputs to a function. Pick a variable name that has not been defined yet in your workspace, say `b` (or something else, if this has already been used in your R Markdown document). Call `huber(x=3, b<-20)`, then display the value of `b`---this variable should now exist in the global enviroment, and it should be equal to 20! Alo, can you explain the output of `huber(x=3, b<-20)`?
+
+```{r}
+huber(x = 3, b <- 20)
+b
+```
+
+Answer: The output of `huber` is 9 because it defaults to a value of `a = 1`, since we specified `b` as out set in the function call in the above code chunk.
+
+- **Challenge.** The property of the assignment operator `<-` demonstrated in the last question, although tricky, can also be pretty useful. Leverage this property to plot the function $y=0.05x^2 - \sin(x)\cos(x) + 0.1\exp(1+\log(x))$ over 50 x values between 0 and 2, using only one line of code and one call to the function `seq()`.
+
+```{r}
+plot(x <- seq(from = 0, to = 2, length.out = 50), 
+     y = 0.05 * x^2 - sin(x) * cos(x) + 0.1 * exp(1+log(x)))
+```
+
+- **1f.** Give an example to show that the property of the assignment operator `<-` demonstrated in the last two questions does not hold in the body of a function. That is, give an example in which `<-` is used in the body of a function to define a variable, but this doesn't translate into global assignment.
+
+```{r}
+func <- function(){
+  foo <- TRUE
+  foo
+}
+
+foo = FALSE
+func()
+foo
+```
+
+Bradley-Terry Model
+===
+In spirit of college basketball (like March Madness), let's simulate some tournaments. One
+model of competition is the Bradley-Terry model. Each team is assigned
+an ability score (team $i$ has score $z_{i}$, team $j$ has score
+$z_{j}$, etc). Then for each game the probability that team $i$
+defeats team $j$ is $\frac{z_{i}}{z_{i} + z_{j}}$.
+
+- **2a.** Write a function `bt_compete(z1, z2)` which takes as its
+  arguments the scores `z1` and `z2` of two teams. Your function then
+  simulates a game between the two teams (with probabilities of
+  victory as described above) and returns 1 if the first team won and
+  2 if the second team won. Hint: look at the documentation for the
+  `probs` argument for `sample()`
+
+```{r}
+# Takes z1, z2, the z scores of two teams. 
+# Returns 1 if team 1 wins, 2 if team 2. 
+# Returns NULL if any z scores are < 0.
+bt_compete <- function(z1, z2, times = 10000){
+  if(z1 < 0 || z2 < 0){
+    return(NULL)
+  }
+  probs <- c((z1 / (z1 + z2)), (z2 / (z1 + z2))) 
+  return(sample(x = c(1, 2), prob = probs, replace = TRUE, size = times))
+}
+```
+
+  To test your function run it 10,000 times for several values of `z1`
+  and `z2` and check that the proportion of times each team wins is
+  roughly equal to the probability (as per the Law of Large Numbers).
+
+```{r}
+test1 <- bt_compete(z1 = 1, z2 = 2)
+test2 <- bt_compete(z1 = -1, z2 = 2)
+test3 <- bt_compete(z1 = 0, z2 = -1)
+test4 <- bt_compete(z1 = 1, z2 = 3)
+test5 <- bt_compete(z1 = 2.5, z2 = 2)
+
+# 5% of the times that this runs? Not precise but not unreasonable.
+tolerance = 10000/20
+
+all.equal(sum(test1[test1 == 1]), 3300, tolerance = tolerance)
+is.null(test2)
+is.null(test3)
+all.equal(sum(test4[test4 == 1]), 2500, tolerance = tolerance)
+all.equal(sum(test5 == 1), 5555, tolerance = tolerance)
+```
+
+- **2b.** Let's now simulate the NCAA tournament with a function
+  `bt_tournament(scores, names)` where `scores` is a vector of `2^m`
+  scores and `names` is the team names. We start by simulating a round
+  of games. Team `2k-1` will play team `2k` with the loser being
+  eliminated. Thus if we started with `2n` teams after a single round
+  we have `n` teams. We then take all of the winners (in the same
+  order as they started) and continue this process until there's only
+  a single team left. Our function returns the name of the winning
+  team. Fill in the following function skeleton to finish this
+  function
+
+```{r}
+# Simulates a single-elimination tournament
+# inputs:
+#   scores: a vector of Bradley-Terry scores. Length must be a power of two.
+#   names: a vector of identifiers for teams. Length must be the same as scores
+# outputs:
+#   The name of the victorious team.
+bt_tournament = function(scores, names = seq_along(scores)) {
+  n_left = length(scores)
+  # Make sure it has length equal to a power of two
+  stopifnot((n_left != 0) && !bitwAnd(n_left , (n_left - 1)))
+  stopifnot(length(scores) == length(names))
+
+  while (n_left != 1) { # iterate until we only have one team remaining
+    for (ii in seq_len(n_left / 2)) {
+      winner = bt_compete(scores[2 * ii - 1], scores[2 * ii]) # returns 1 or 2
+
+      # Move winner to ii-th place for next round; we can reuse the
+      # array since we don't access element ii until the next round.
+      winner_index = (2 * ii) - 2 + winner
+      scores[ii] = scores[winner_index]
+      names[ii] = names[winner_index] # keep names in sync with scores
+    }
+    n_left = n_left / 2
+  }
+  # Accesses names at the winner's index.
+  return(names[ii])
+}
+```
+
+  Now create 32 teams with scores initialized as `Gamma(5, 10)` random
+  variables and then run 10000 tournaments (with the scores held
+  constant). Report how many times the best team won. Plot the
+  scatterplot of score vs the number of times a team wins the
+  tournament.
+
+```{r, warning = FALSE}
+n <- 32
+scores <- rgamma(n, 5, 10)
+scores <- sort(scores, decreasing = TRUE)
+# Now, the element at scores[1] should be the best team. 
+
+results <- replicate(n = 10000, expr = bt_tournament(scores))
+```
+
+```{r}
+# Create the seed counts and populate them
+seed.counts <- vector(length = n)
+names(seed.counts) <- 1:n
+for(i in 1:n){
+  seed.counts[i] = sum(results == i)
+}
+
+oneseed <- sum(results == 1)
+cat("The number of times the number one seed won was", oneseed)
+
+plot(seed.counts, scores)
+```
+
+- **Challenge** A common complaint heard during the tournament is that
+  "my team got a bad seeding" (and notice how you never hear someone
+  discuss their good seeding). We might be curious, what is the effect
+  of seeding on one's probability of winning the tournament.
+
+  The following function will provide the usual seeding for
+  single-elimination tournament (the NCAA is a bit different).
+
+```{r}
+tournament_order = function(scores) {
+  n = length(scores)
+  stopifnot((n != 0) && !bitwAnd(n, (n - 1)))
+
+  seeding = c(1, 2)
+  while(length(seeding) != n) {
+    new_seeding = rep(NA, length(seeding) * 2)
+    new_seeding[c(TRUE, FALSE)] = seeding
+    new_seeding[c(FALSE, TRUE)] = length(new_seeding) + 1 - seeding
+    seeding = new_seeding
+  }
+  return(order(scores, decreasing = TRUE)[seeding])
+}
+```
+
+We'll then compare against a "worst" case seeding determined by
+the following function.
+
+```{r}
+worst_order = function(scores) {
+  return(order(scores, decreasing = TRUE))
+}
+```
+
+  First, explain how these functions work and why they're named as
+  they are. Next, using the same scores as before run 10,000
+  tournaments with these two seedings. Record the number of times the
+  /best/ team wins under each seeding. Is there a difference between
+  the two? Should we conclude anything about whether seeding matters?
+
+AB Testing
+===
+The questions in this section build off of Lab 3.2. We will continue our
+investigation of an important statistical topic called the "Stopping rules".
+These questions will have you write and use functions to get a grasp
+of what this topic is about, and students who are curious for more 
+details can read about it by Googling "stopping rules clinical trials".
+
+To reiterate, in this field, the idea is: it's sometimes expensive to collect more data, so if
+you have determined that the effect of a drug is already substantial, you want to
+stop the clinical trial early (and save some money!). However, the exact procedure
+to determine when to stop collecting data can dramatically impact the conclusions
+you find. Luckily, it's possible to study the impact of different stopping rules at the
+safety of a simulation, which is what we will do.
+
+Recall what we ended with in Lab 3.2. We have quite a few functions:
+`simulate.data()` which generates the data, `stopping.rule.ttest()` which is a stopping rule using a t-test, `simulate.difference()`
+which generates data and computes the difference according to a stopping rule,
+and `rep.sim()` which replicates `simulate.difference()` over many replications.
+We will make our setup much more general (by changing the inputs) but this generality
+will make our functions increasingly more complicated.
+
+- **3a.** We will be modifying `simulate.data()`
+ so we can pass a function as an input to change how the data is simulated. Redefine `simulate.difference()` to take as input
+`n` as the number of subjects to take drug or not take drug 
+with default value of 200, `drug.distr()`
+as the function to generate random numbers for subjects who take the drug,
+and `no.drug.distr()` as the function to generate random numbers for subjects
+who do not take the drug. 
+Set the default function of `drug.dist()` to be be a function that takes
+`n` as input and simulate data from the following distribution, 
+$$
+X_{\mathrm{drug}} \sim \mathrm{Normal}(\mathrm{mean}=150, \mathrm{sd} = 10).
+$$
+Similarly, set the default function of `no.drug.distr()` to be a function
+that takes `n` as input and simulate from the following distribution,
+$$
+X_{\mathrm{no\,drug}} \sim \mathrm{Normal}(\mathrm{mean}=100, \mathrm{sd} = 10).
+$$
+Similar to Lab 3.2, `simulate.data()` will return
+a list should return a list with two vectors 
+called `no.drug` and `drug`. Each of these two vectors should 
+have length `n`. Using these default values, store the result
+of `simulate.data()` in a variable calld `data.1`.
+Compute the mean and standard deviation of `data.1$drug`
+and `data.1$no.drug` to ensure you properly simulated data. 
+
+```{r}
+default.drug <- function(n, coeff = 1, mean = 150, sd = 10){
+  return(coeff * rnorm(n = n, mean = mean, sd = sd))
+}
+
+default.nodrug <- function(n, coeff = 1, mean = 100, sd = 10){
+  return(coeff * rnorm(n = n, mean = mean, sd = sd))
+}
+
+# n - sample size, for both treatment group and for the control.
+# mu.drug = mean expotential distribution that defines the drug tumor reduction
+# measurements
+simulate.data <- function(n = 200, mu.drug = 2, coeff = 100, 
+                          drug.dist = default.drug, 
+                          nodrug.dist = default.nodrug){
+  drug = drug.dist(n, coeff = coeff)
+  control = nodrug.dist(n, coeff = coeff)
+  return(list(drug = drug, 
+              nodrug = control))
+}
+
+data1 <- simulate.data()
+
+cat("Mean of drug data:", mean(data1$drug), "sd:", sd(data1$drug), "\n")
+cat("Mean of nodrug data:", mean(data1$nodrug), "sd:", sd(data1$nodrug))
+```
+
+- **3b.** Now we want to design our stopping rules. First, copy-and-paste the
+stopping rule, `stopping.rule.ttest()`, from the Lab 3.2 (once again, it
+takes in two vectors `drug.vector` and `no.drug.vector` and a numeric `alpha` with
+default value of 0.05 as input, and outputs `TRUE` or `FALSE`). Then,
+write a new stopping rule called `stopping.rule.adaptive()`. Like before, it uses
+`t.test()`, but here's the difference: the threshold of the p-value will vary with
+the length of `drug.vector` and `no.drug.vector`. 
+Let `m` denote the length of `drug.vector` (assumed to be the same as
+the length of `no.drug.vector). `stopping.rule.adaptive()` should output `TRUE` if 
+the p-value is less than
+
+$$
+\frac{\exp(m/25)}{60000},
+$$
+
+and return `FALSE` otherwise. 
+After writing `stopping.rule.ttest()` and `stopping.rule.adaptive()`, 
+use both stopping rules on `data.1` (where `drug.vector` is `data.1$drug`,
+and `no.drug.vector` is `data.1$no.drug`) to demonstrate your function works.
+
+```{r}
+stopping.rule.ttest <- function(drug.vector, no.drug.vector, alpha = 0.05){
+  results <- t.test(x = drug.vector, y = no.drug.vector, 
+              alternative = "two.sided")
+  return(results$p.value < alpha)
+}
+
+stopping.rule.adaptive <- function(drug.vector, no.drug.vector, alpha = 0.05){
+  results <- t.test(x = drug.vector, y = no.drug.vector, 
+                    alternative = "two.sided")
+  return(results$p.value < (exp(length(drug.vector) / 25) / 60000))
+}
+
+stoppingt <- stopping.rule.ttest(data1$drug, data1$nodrug)
+stoppingadaptive <- stopping.rule.adaptive(data1$drug, data1$nodrug)
+cat("Result of t-test stopping rule:", stoppingt, "\n")
+cat("Result of adaptive stopping rule:", stoppingadaptive, "\n")
+```
+
+- **3c.** Although we changed `simulate.data()` to allow 
+for any distributions for `drug.distr()` and `no.drug.distr()`, 
+we have not changed `simulate.difference()` or `rep.sim()` yet to accommodate for
+this. In this question, you'll redefine `simulate.difference()` to
+accommodate for this. We also want to return the number of subjects we
+effectively used in our simulation.
+
+Specifically, `simulate.difference()` should take in 4 arguments, `n` as the number of subjects
+(same as before), `drug.distr()` and `no.drug.distr()` (same as in Question 3a)
+and `stopping.rule()` (same as in Lab 3.2 Question 3c). 
+This function should
+generate data using `simulate.data()` according to `drug.distr()` and `no.drug.distr()`,
+and then (just like in Lab 3.2 Question 3c), apply `stopping.rule()` starting
+from 5 cases and controls.
+If `stopping.rule()` returns `TRUE`, stop considering
+more subjects. Otherwise, apply `stopping.rule()` to 
+5 additional cases and controls, until all `n` cases and controls have been
+considered. 
+Use the same default values for each of the 4 arguments as before, where
+the default stopping rule is `stopping.rule.ttest()`.
+`simulate.difference()` returns a list (**Note, the output has changed from the Lab**) with
+two elements: `result` which is a string that says either "Positive", "Negative"
+or "Inconclusive", and `samples` which is a numeric that says how many
+cases were effectively considered (i.e., a number between `5` and `n`).
+Print out the result of `simulate.difference()` using the default values
+to demonstrate your function works. 
+
+```{r}
+simulate.difference <- function(n = 200, mu.drug = 2, min.cases = 5, 
+                                stopping.rule = stopping.rule.ttest,
+                                drug.dist = default.drug, 
+                                nodrug.dist = default.nodrug){
+  #Construct a vector to loop through based on multiples of min.cases
+  iterator <- min.cases:n
+  iterator <- iterator[iterator %% min.cases == 0]
+  
+  data <- simulate.data(n = n, mu.drug = mu.drug, drug.dist = drug.dist, nodrug.dist = nodrug.dist)
+  difference <- mean(data$drug) - mean(data$nodrug)
+  for(i in iterator){
+    if(stopping.rule(data$drug[1:i], data$nodrug[1:i])){
+      if(mean(data$drug[1:i]) > mean(data$nodrug[1:i])){
+        return(list(result = "Positive", samples = i))
+      }
+      else{
+        return(list(result = "Negative", samples = i))
+      }
+    }
+  }
+  return(list(result = "Inconclusive", samples = i))
+}
+
+cat("Output of simulate.difference():\n")
+simulate.difference()
+```
+
+- **3d.** We need to modify `rep.sim()` as well before we can run our experiments.
+Modify `rep.sim()` (originally defined in Lab 3.2) to accommodate different
+stopping rules and distributions. Your new `rep.sim()` function will take in the 
+following 6 inputs: `nreps`, `n`, `drug.distr()`, `no.drug.distr()`,
+`stopping.rule()` and `seed`. Use the default values that we've been using thus-far.
+This function outputs a vector of length `n` containing `Positive` and `Negative` strings.
+`rep.sim()` should appropriately use all 6 inputs (which you will have to
+use your judgement to assess how to do this. This is not intended to be
+hard, but it might
+take some thinking to understand how the 6 inputs are used.)
+`rep.sim()` returns a list (**Note, the output has changed from the Lab**) with
+two elements: `table` (which is a vector that counts how many instances of
+"Positive", "Negative" and "Inconclusive" results there were among the
+`nreps` repetitions), and `mean.samples` (which is the mean number of
+cases considered when the result was **NOT** "Inconclusive").
+Print out the result of `rep.sim()` using the default values
+to demonstrate your function works. 
+
+```{r}
+rep.sim = function(nreps = 200, n = 200, seed = NULL, 
+                   drug.distr = default.drug, 
+                   nodrug.distr = default.nodrug, 
+                   stopping.rule = stopping.rule.ttest){
+  if(!is.null(seed)) set.seed(seed)
+  
+  results <- replicate(nreps, simulate.difference(n = n, 
+                                                  drug.dist = drug.distr,
+                                                  nodrug.dist = nodrug.distr, 
+                                                  stopping.rule = stopping.rule))
+  
+  samples <- sapply(results[2,], identity)
+  return(list(table = table(sapply(results[1,], identity)),
+              mean.samples = mean(samples[samples != 200])))
+}
+
+cat("rep.sim() called with default parameters:\n")
+rep.sim()
+```
+
+- **3e.** Now we are finally ready to use our generalized simulation step.
+We will be running `rep.sim()` four times, each time with slightly different
+arguments. In the first run, use all default arguments for `rep.sim()`.
+In the second run, set `stopping.rule()` to be `stopping.rule.adaptive()`.
+In the third run, set `drug.distr()` to be exactly the same as `no.drug.distr()`
+(i.e, both cases and controls are drawing from the same distribution, meaning
+there is no difference). In the last run, set `stopping.rule()` to be `stopping.rule.adaptive()`
+and `drug.distr()` to be exactly the same as `no.drug.distr()`.
+Each of these four runs should require exactly one line of code, where you are
+changing only the inputs to `rep.sim()`. Print all four results. 
+
+```{r}
+cat("-----------------------------------------\n")
+cat("rep.sim() with defaults:\n")
+rep.sim(seed = 0)
+cat("-----------------------------------------\n")
+cat("rep.sim() with adaptive stopping rule\n")
+rep.sim(stopping.rule = stopping.rule.adaptive, seed = 0)
+cat("-----------------------------------------\n")
+cat("rep.sim() with equal distributions\n")
+rep.sim(drug.distr = default.drug, nodrug.distr = default.drug, seed = 0)
+cat("-----------------------------------------\n")
+cat("rep.sim() with adaptive stopping rule and equal distributions\n")
+rep.sim(stopping.rule = stopping.rule.adaptive, 
+        drug.distr = default.drug, nodrug.distr = default.drug, seed = 0)
+```
+
+- **Challenge** This question is more about statistics than coding. 
+Provide a short (at most 5 sentences) explanation to interpret your results in
+Question 2e. In particular, think about the following things: 1 ) Our goal in this
+entire section was to design stopping rules so instead of collecting all `n = 200`
+cases and controls, we only needed to collect a smaller number of subjects.
+Was this achieved in simulation? 2) In some of the simulations in Question 2e, `drug.distr`
+and `no.drug.distr` were exactly the same. What do you hope would've happened
+`simulate.difference()` would have returned in this case, and what actually 
+happened based on your simulation results? 3) How exactly are `stopping.rule.ttest()`
+and `stopping.rule.adaptive()` different? What does this difference mean statistically?
+
+
+Merging
+===
+
+- **4a.** The Social Security Administration, among other things,
+    maintains a list of the most popular baby names.
+    Load the file located at 
+    the URL `https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/PA.txt` 
+    into R as a
+    data frame `pa.names` with variable names `State`, `Gender`,
+    `Year`, `Name` and `Count`.
+     This is a fun
+    dataset to browse: for instance you can see the name "Elvis"
+    suddenly jumped in popularity in the mid 1950s.
+    For those interested, we obtained this data from
+    `https://www.ssa.gov/oact/babynames/state/namesbystate.zip`. 
+    Print the
+    first three rows of the data frame.
+
+```{r}
+url <- "https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/PA.txt"
+colnames <- c("State", "Gender", "Year", "Name", "Count")
+pa.names <- read.table(url, header = FALSE, sep = ",", quote = "",
+                       col.names = colnames)
+
+head(pa.names, 3)
+```
+
+- **4b.** Load the file at the URL `https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/NC.txt`  as `nc.names` using the same variable
+    names as `pa.names`. Count how many names `nc.names` has in
+    common with `pa.names`. Similar to `pa.names`, make sure
+    the variables in `nc.names` are called `State`, `Gender`,
+    `Year`, `Name` and `Count`. Print the first three rows of `nc.names`.
+
+```{r}
+url <- "https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/NC.txt"
+colnames <- c("State", "Gender", "Year", "Name", "Count")
+nc.names <- read.table(url, header = FALSE, sep = ",", quote = "", 
+                       col.names = colnames)
+
+head(nc.names, 3)
+```
+
+- **4c.** Merge the two files to create a dataframe `manual.merge`
+    which contains columns for counts in each state. The resulting data frame
+    should have columns `Name`, `Gender`, `Year`, `PA Counts`, `NC
+    Counts`. If a name does not appear in one of the data frame,  make
+    the count in the merged data frame under the appropriate
+    column equal to zero. Do not use the
+    `merge()` function. Print the first three and last three rows of
+    the merged data frame. You do not need to write this as a function.
+    (Hint: you might want to follow a similar strategy as what we did in the lab when we manually merged the winning male and female sprinters based on the Country and year.)
+
+```{r}
+# Merging on name/gender pairings. 
+# First, merge the Gender and Name variables into one variable and rename counts
+pa.names$id <- paste(pa.names$Gender, pa.names$Name, pa.names$Year, sep = "_")
+nc.names$id <- paste(nc.names$Gender, nc.names$Name, nc.names$Year, sep = "_")
+names(pa.names)[5] <- "PA Counts"
+names(nc.names)[5] <- "NC Counts"
+
+# Wipe gender, name, and year since they're stored in id now.
+pa.names <- pa.names[,-(1:4)]
+nc.names <- nc.names[,-(1:4)]
+
+# Next, add a gender/name pairing to each dataset if it doesn't appear in the other.
+all_names <- unique(c(pa.names$id, nc.names$id))
+
+pa.additions <- data.frame(all_names[!(all_names %in% pa.names$id)])
+countsVector <- countsVector <- rep(0, nrow(pa.additions))
+pa.additions <- cbind(countsVector, pa.additions)
+names(pa.additions) <- c("PA Counts", "id")
+pa.names <- rbind(pa.names, pa.additions)
+
+nc.additions <- data.frame(all_names[!(all_names %in% nc.names$id)])
+countsVector <- countsVector <- rep(0, nrow(nc.additions))
+nc.additions <- cbind(countsVector, nc.additions)
+names(nc.additions) <- c("NC Counts", "id")
+nc.names <- rbind(nc.names, nc.additions)
+
+
+#Sort both dataframes
+pa.names <- pa.names[order(pa.names$id), ]
+nc.names <- nc.names[order(nc.names$id), ]
+
+#Bind the dataframes together, delete the replicated id column
+manual.merge <- cbind(pa.names, nc.names)
+manual.merge <- manual.merge[,-4]
+
+# Unpack the id variable
+manual.merge$Gender <- substr(manual.merge$id, 1, 1)
+manual.merge$Name <- substr(manual.merge$id, 3, nchar(manual.merge$id) - 5)
+manual.merge$Year <- substr(manual.merge$id, 
+                            nchar(manual.merge$id) - 3, 
+                            nchar(manual.merge$id)) 
+
+# Final data cleaning: wipe id, reorder, rename rows
+manual.merge$id <- NULL
+manual.merge <- manual.merge[,c(3, 4, 5, 1, 2)]
+rownames(manual.merge) <- 1:nrow(manual.merge)
+```
+
+- **4d.** Verify the the result in Question 4c is correct by using `merge()` to create
+    `merge.merged`. Check that `merge.merged` is equivalent (up to
+    ordering of the rows) to `manual.merged` using `all.equal` (with
+    some reordering). You will need to modify the output of `merge()` to
+    get this to work.
+
+```{r}
+# Merge the datasets
+merge.merged <- merge(pa.names, nc.names, 
+                      by = "id", all = TRUE,
+                      suffixes = c("_PA", "_NC"))
+
+# Handle na values
+merge.merged[is.na(merge.merged), ] <- 0
+
+# Unpack the id variable
+merge.merged$Gender <- substr(merge.merged$id, 1, 1)
+merge.merged$Name <- substr(merge.merged$id, 3, nchar(merge.merged$id) - 5)
+merge.merged$Year <- substr(merge.merged$id, 
+                            nchar(merge.merged$id) - 3, 
+                            nchar(merge.merged$id)) 
+
+# Final data cleaning: wipe id, reorder
+merge.merged$id <- NULL
+merge.merged <- merge.merged[,c(3, 4, 5, 1, 2)]
+
+```
+
+```{r}
+result <- all.equal(manual.merge, merge.merged)
+cat("Testing whether manual.merge and merge.merged are all.equal():", result)
+```
+

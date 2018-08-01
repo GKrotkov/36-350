@@ -1,0 +1,24 @@
+unnamed-chunk-2	huber	x.squared
+unnamed-chunk-3	a
+unnamed-chunk-4	a	huber.sloppy
+unnamed-chunk-5	a	x
+unnamed-chunk-6	b
+unnamed-chunk-7	x
+unnamed-chunk-8	foo	func
+unnamed-chunk-9	bt_compete
+unnamed-chunk-10	test1	test2	test3	test4	test5	tolerance	.Random.seed
+unnamed-chunk-11	bt_tournament
+unnamed-chunk-12	n	results	scores
+unnamed-chunk-13	i	oneseed	seed.counts
+unnamed-chunk-14	tournament_order
+unnamed-chunk-15	worst_order
+unnamed-chunk-16	data1	default.drug	default.nodrug	simulate.data
+unnamed-chunk-17	stopping.rule.adaptive	stopping.rule.ttest	stoppingadaptive	stoppingt
+unnamed-chunk-18	simulate.difference
+unnamed-chunk-19	rep.sim
+unnamed-chunk-20	
+unnamed-chunk-21	colnames	pa.names	url
+unnamed-chunk-22	colnames	nc.names	url
+unnamed-chunk-23	all_names	countsVector	manual.merge	nc.additions	nc.names	pa.additions	pa.names
+unnamed-chunk-24	merge.merged
+unnamed-chunk-25	result

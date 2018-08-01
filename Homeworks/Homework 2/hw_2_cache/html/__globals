@@ -1,0 +1,27 @@
+unnamed-chunk-2	state.df	data.frame	state.x77	state.region	state.division
+unnamed-chunk-3	state.df	Abbr	state.abb	head
+unnamed-chunk-4	state.df	Region	head
+unnamed-chunk-5	state.df	Center.x	state.center	x	Center.y	y	head
+unnamed-chunk-6	state.df2	state.df	Center.x	state.df3	subset	all.equal
+unnamed-chunk-7	pros.dat	read.table
+unnamed-chunk-8	sapply	pros.dat	mean	sd
+unnamed-chunk-9	t.test.by.ind	stopifnot	all	ind	%in%	c	return	t.test	x	tests	lapply	pros.dat	typeof
+unnamed-chunk-10	rio	read.csv
+unnamed-chunk-11	summary	rio
+unnamed-chunk-12	cat	nrow	rio	rio.nat.table	sort	table	length
+unnamed-chunk-13	cat	sum	rio	gold	silver	bronze
+unnamed-chunk-14	rio	total	gold	silver	bronze	which	max	c
+unnamed-chunk-15	total.by.nat	tapply	rio	total	nationality	sum	maxMedals	max	cat	names	numZeros
+unnamed-chunk-16	age	as.numeric	substr	rio	date_of_birth	name	as.character	rio.medals	total	max	c	min
+unnamed-chunk-17	age	as.numeric	substr	rio	date_of_birth	name	as.character	rio.medals	total	oldestAge	apply	max	youngestAge	min	c	medalist	factor	ifelse	tota	oldestMedal	tapply	youngestMedal
+unnamed-chunk-18	sports	data.frame	sort	unique	rio	sport	names	count.participants	sport.col	sum	search	n_participants	apply	n_golds	tapply	gold	gold_ratio	highestGold	as.character	Name	order	nrow	lowestGold	cat
+unnamed-chunk-19	sprint.dat	read.table
+unnamed-chunk-20	sprint.dates	as.character	sprint.dat	Date	sprint.years	as.numeric	substr	sprint.bdates	Birthdate	lastChar	nchar	sprint.byears	substring	sprint.ages	Age	time.avg.by.age	tapply	Time	mean	names
+unnamed-chunk-21	plot	as.numeric	names	time.avg.by.age
+unnamed-chunk-22	sprint.times	sprint.dat	Time	plot	sprint.years	sprint.years.jam	Country	sprint.times.jam	points	legend	c
+unnamed-chunk-23	plot	sprint.years	sprint.times	sprint.years.usa	sprint.dat	Country	sprint.times.usa	points	legend	c
+unnamed-chunk-24	image	volcano	terrain.colors
+unnamed-chunk-25	volcano.rev	matrix	rev	volcano
+unnamed-chunk-26	clockwise90	t	a	nrow	image	volcano.rev
+unnamed-chunk-27	image	clockwise90	volcano.rev	contour
+unnamed-chunk-28	filled.contour	clockwise90	volcano.rev	topo.colors

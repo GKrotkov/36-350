@@ -1,0 +1,382 @@
+---
+title: "Homework 2: Data Frames Apply and Plotting"
+author: "Statistical Computing, 36-350"
+date: "Week of Monday July 9, 2018"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE)
+```
+
+Name:  Gabriel Krotkov
+Andrew ID:  gkrotkov
+Collaborated with:  Steve Kim
+
+On this homework, you can collaborate with your classmates, but you must identify their names above, and you must submit **your own** homework as an knitted HTML file on Canvas, by Monday 10pm, next week (July 16).
+
+States data set
+===
+
+Below we construct a data frame, of 50 states x 10 variables. The first 8 variables are numeric and the last 2 are factors. The numeric variables here come from the built-in `state.x77` matrix, which records various demographic factors on 50 US states, measured in the 1970s. You can learn more about this state data set by typing `?state.x77` into your R console. 
+
+```{r}
+state.df <- data.frame(state.x77, Region=state.region, Division=state.division)
+```
+
+Basic data frame manipulations
+===
+
+- **1a.** Add a column to `state.df`, containing the state abbreviations that are stored in the built-in vector `state.abb`. Name this column `Abbr`. You can do this in (at least) two ways: by using a call to `data.frame()`, or by directly defining `state.df$Abbr`. Display the first 3 rows and all 11 columns of the new `state.df`.
+
+```{r}
+state.df$Abbr <- state.abb
+
+head(state.df, 3)
+```
+
+- **1b.** Remove the `Region` column from `state.df`. You can do this in (at least) two ways: by using negative indexing, or by directly setting `state.df$Region` to be `NULL`. Display the first 3 rows and all 10 columns of `state.df`.
+
+```{r}
+state.df$Region <- NULL
+
+head(state.df, 3)
+```
+
+- **1c.** Add two columns to `state.df`, containing the x and y coordinates (longitude and latitude, respectively) of the center of the states, that are stored in the (existing) list `state.center`. Hint: take a look at this list in the console, to see what its elements are named. Name these two columns `Center.x` and `Center.y`. Display the first 3 rows and all 12 columns of `state.df`.
+
+```{r}
+state.df$Center.x <- state.center$x
+state.df$Center.y <- state.center$y
+
+head(state.df, 3)
+```
+
+- **1d.** Make a new data.frame which contains only those states whose longitude is less than -100. Do this in two different ways and check that they are equal to each other, using an appropriate function call.
+
+```{r}
+state.df2 <- state.df[state.df$Center.x < -100,]
+state.df3 <- subset(state.df, 
+                    subset = Center.x < -100)
+
+all.equal(state.df2, state.df3)
+```
+
+Prostate cancer data set
+===
+
+Let's return to the prostate cancer data set that we looked at in the lab/homework from Week 2 (taken from the book [The Elements of Statistical Learning](http://statweb.stanford.edu/~hastie/ElemStatLearn/)). Below we read in a data frame of 97 men x 9 variables. You can remind yourself about what's been measured by looking back at the lab/homework (or by visiting the URL linked above in your web browser, clicking on "Data" on the left-hand menu, and clicking "Info" under "Prostate"). 
+
+```{r}
+pros.dat <- 
+  read.table("https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/pros.dat")
+```
+
+Practice with the apply family
+===
+
+- **2a.** Using `sapply()`, calculate the mean of each variable. Also, calculate the standard deviation of each variable. Each should require just one line of code. Display your results.
+
+```{r}
+sapply(pros.dat, FUN = mean)
+sapply(pros.dat, FUN = sd)
+```
+
+- **2b.** Now, use `lapply()` to perform t-tests for each variable in the data set, between SVI and non-SVI groups. To be precise, you will perform a t-test for each variable excluding the SVI variable itself. For convenience, we've defined a function `t.test.by.ind()` below, which takes a numeric variable `x`, and then an indicator variable `ind` (of 0s and 1s) that defines the groups. Run this function on the columns of `pros.dat`, and save the result as `tests`. What kind of data structure is `tests`? Print it to the console.
+
+```{r}
+t.test.by.ind <- function(x, ind) {
+  stopifnot(all(ind %in% c(0, 1)))
+  return(t.test(x[ind == 0], x[ind == 1]))
+}
+
+tests <- lapply(pros.dat[-5], 
+                FUN = t.test.by.ind, 
+                ind = pros.dat["svi"]==1)
+
+typeof(tests)
+```
+
+- **Challenge.** Using an appropriate apply function again, extract the p-values from the `tests` object you created in the last question, with just a single line of code. Hint: run the command `"[["(pros.dat, "lcavol")` in your console---what does this do?
+
+Rio Olympics data set
+===
+
+It's Winter Olympics time! To get into the Olympics spirit, we're going to examine data from the 2016 Summer Olympics in Rio de Janeiro, taken from https://github.com/flother/rio2016 (itself put together by scraping the official Summer Olympics website for information about the athletes). Below we read in the data and store it as `rio`.
+```{r}
+rio <- read.csv("https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/rio.csv", stringsAsFactors = FALSE)
+```
+
+More practice with data frames and apply
+===
+
+- **3a.** Call `summary()` on `rio` and display the result. Is there any missing data?
+
+```{r}
+summary(rio)
+```
+
+Answer: There were 330 NAs in the `height` variable, and 659 NAs in the `weight` variable.
+
+- **3b.** Use `rio` to answer the following questions. How many athletes competed in the 2016 Summer Olympics? How many countries were represented? What were these countries, and how many athletes competed for each one? Which country brought the most athletes, and how many was this? 
+
+```{r}
+cat("Number of athletes:", nrow(rio), "\n")
+rio.nat.table <- sort(table(rio[,3]), decreasing = TRUE)
+cat("Number of countries:", length(rio.nat.table), "\n")
+rio.nat.table
+```
+
+The United States brought the most athletes, bringing 567 athletes. 
+
+- **3c.** How many medals of each type---gold, silver, bronze---were awarded at this Olympics? Is this result surprising, and can you explain what you are seeing?
+
+```{r}
+cat("The number of gold medals awarded:", sum(rio$gold), "\n")
+cat("The number of silver medals awarded:", sum(rio$silver), "\n")
+cat("The number of bronze medals awarded:", sum(rio$bronze), "\n")
+```
+
+Answer: This result is surprising, because you'd expect there to be an equal number of medals given out, since each event should hand out one gold, one silver, and one bronze. Perhaps the differences are due to the medal awardings in team sports, or medals revoked due to doping investigations? If there are ties in timed sports (swimming, track) then perhaps a pair of golds might be given out instead of a silver, or multiple bronzes?
+
+- **3d.** Create a column called `total` which adds the number of gold, silver, and bronze medals for each athlete, and add this column to `rio`. Which athlete had the most number of medals and how many was this? Which athlete had the most silver medals and how many was this? (Ouch! So close, so many times ...) In the case of ties, here, display all the relevant athletes. 
+
+```{r}
+rio$total <- rio$gold + rio$silver + rio$bronze
+rio[which(rio$total == max(rio$total)), c("name", "total")]
+rio[which(rio$silver == max(rio$silver)), c("name", "silver")]
+```
+
+Answer: The athlete with the most number of medals was Michael Phelps, with 6 total medals, 5 of which were gold. There was a 21 way tie for the higher number of silver medals, all with 2 silvers.
+
+- **3e.** Using `tapply()`, calculate the total medal count for each country. Save the result as `total.by.nat`, and print it to the console. Which country had the most number of medals, and how many was this? How many countries had zero medals? **Challenge**: among the countries that had zero medals, which had the most athletes, and how many athletes was this? (Ouch!)
+
+```{r}
+total.by.nat <- tapply(rio$total, 
+                       INDEX = rio$nationality, 
+                       FUN = sum)
+
+total.by.nat
+
+maxMedals <- total.by.nat[total.by.nat == max(total.by.nat)]
+cat("The country with the most medals:", names(maxMedals), "with", maxMedals, "medals. \n")
+
+numZeros <- sum(total.by.nat == 0)
+cat("The number of countries with zero medals was", numZeros, "\n")
+```
+
+Some advanced practice with apply
+===
+
+- **4a.** The variable `date_of_birth` contains strings of the date of birth of each athlete. Use text processing commands to extract the year of birth, and create a new numeric variable called `age`, equal to 2016 - (the year of birth). (Here we're ignoring days and months for simplicity.) Add the `age` variable to the `rio` data frame. variable  Who is the oldest athlete, and how old is he/she? Youngest athlete, and how old is he/she? In the case of ties, here, display all the relevant athletes. **Challenge:** Answer the same questions, but now only among athletes who won a medal.
+
+```{r, echo = FALSE, eval = FALSE}
+# I've set this to echo = FALSE and eval = FALSE because I don't really like
+# this way of solving it but it worked quite well.
+age <- 2016 - as.numeric(substr(rio$date_of_birth, 1, 4))
+rio$age <- age
+rio$name <- as.character(rio$name)
+rio.medals <- rio[rio$total > 0,]
+
+# Solving it with indexing, which I suspect isn't the preferred way.
+rio[rio$age == max(rio$age), c("name", "age")]
+rio[rio$age == min(rio$age), c("name", "age")]
+
+rio.medals[rio.medals$age == max(rio.medals$age), c("name", "age")]
+rio.medals[rio.medals$age == min(rio.medals$age), c("name", "age")]
+```
+
+
+```{r}
+age <- 2016 - as.numeric(substr(rio$date_of_birth, 1, 4))
+rio$age <- age
+rio$name <- as.character(rio$name)
+rio.medals <- rio[rio$total > 0,]
+
+# Solving it with apply (kinda jenky tbh)
+oldestAge <- apply(rio, 2, max)["age"]
+youngestAge <- apply(rio, 2, min)["age"]
+rio[rio$age == oldestAge, c("name", "age")]
+rio[rio$age == youngestAge, c("name", "age")]
+
+# tapply method for conditioning on medal status
+rio$medalist <- factor(ifelse(rio$tota > 0, 1, 0))
+oldestMedal <- tapply(rio$age, rio$medalist, max)["1"]
+youngestMedal <- tapply(rio$age, rio$medalist, min)["1"]
+rio.medals[rio.medals$age == oldestMedal, c("name", "age")]
+rio.medals[rio.medals$age == youngestMedal, c("name", "age")]
+```
+
+Answer: Two female equestians tie for the oldest athlete (in years alone) at the Rio Olympics: Julie Brougham and Mary Hanna, at 62 years old. There is an 8 way tie for the youngest athlete between a bunch of 14 year olds.
+
+- **4b.** Create a new data.frame called `sports`, which we'll populate with information about each sporting event at the Summer Olympics. Initially, define `sports` to contain a single variable called `sport` which contains the names of the sporting events in alphabetical order. Then, add a column called `n_participants` which contains the number of participants in each sport. Use one of the apply functions to determine the number of gold medals given out for each sport, and add this as a column called `n_gold`. Using your newly created `sports` data frame, calculate the ratio of the number of gold medals to participants for each sport. Which sport has the highest ratio? Which has the lowest?
+
+```{r}
+sports <- data.frame(sort(unique(rio$sport)))
+names(sports)[1] <- "Name"
+
+# finds the number of instances of "search" in rio at the "sport" column 
+# assumes the existence of rio, and that rio has a "sport" column.  
+count.participants = function(search){
+  sport.col <- 8
+  sum(rio[sport.col] == search)
+}
+
+sports$n_participants <- apply(sports, 
+                               MARGIN = 1, 
+                               FUN = count.participants)
+
+sports$n_golds <- tapply(rio$gold, rio$sport, sum)
+
+sports$gold_ratio <- sports$n_golds / sports$n_participants
+
+highestGold <- as.character(sports$Name[order(sports$gold_ratio)[nrow(sports)]])
+lowestGold <- as.character(sports$Name[order(sports$gold_ratio)[1]])
+
+cat("The highest gold:participant ratio comes from:", highestGold, "\n")
+cat("The lowest gold:participant ratio comes from:", lowestGold, "\n")
+```
+
+
+Plotting tools and layers
+===
+
+Below we read in a data set, as in lab, of the 2988 fastest times recorded for the 100m sprint, in men's track. This data set was scraped from http://www.alltime-athletics.com/m_100ok.htm (this website was apparently last updated in November 2017).
+
+```{r}
+sprint.dat = read.table(
+  file="https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/sprint.m.dat", 
+  sep="\t", quote="", header=TRUE)
+```
+
+- **5a.** As we did in Lab (2.2, Question 4a), compute a vector `sprint.ages` containing the age (in years) of each sprinter when their sprint time was recorded. Then add a column 
+`Age` to `sprint.dat` with these ages.
+Using one of the apply functions, compute the average sprint time for each age in the `sprint.dat` data set, calling the result `time.avg.by.age`. Are there any ages for which the men's average time is faster than 10 seconds, and if so, which ones? 
+
+```{r}
+sprint.dates <- as.character(sprint.dat$Date)
+sprint.years <- as.numeric(substr(sprint.dates, 7, 10))
+
+sprint.bdates <- as.character(sprint.dat$Birthdate)
+lastChar <- nchar(sprint.bdates[1])
+sprint.byears <- substring(sprint.bdates, 
+                           nchar(sprint.bdates) - 1, nchar(sprint.bdates))
+sprint.byears <- 1900 + as.numeric(sprint.byears)
+
+sprint.ages <- sprint.years - sprint.byears
+
+sprint.dat$Age <- sprint.ages
+
+time.avg.by.age <- tapply(sprint.dat$Time, sprint.dat$Age, mean)
+names(time.avg.by.age[time.avg.by.age < 10])
+```
+
+Answer: There is only one age for which the average men's time is faster than 10 seconds, 33 years old.
+
+- **5b.** Plot `time.avg.by.age` versus the corresponding men's ages. Set the axes labels and title appropriately. Do you notice any trend?
+
+```{r}
+plot(x = as.numeric(names(time.avg.by.age)), 
+     y = time.avg.by.age, 
+     xlab = "Ages",
+     ylab = "Average Time", 
+     main = "Average time by age")
+```
+
+Answer: The average time for each age tends to steadily decrease until at around 32, they peak (or valley, depending on how you want to view it) at 33 on average when there was an unusually dramatic increase in speed, and then they regress slightly until 35, when they dramatically fall off. 
+
+- **5c.** As we did in Lab (2.2, Question 3a), Ddfine a character vector `sprint.years` to contain the last 4 characters of an entry of `sprint.dates`. This contains the years in which each time in the `sprint.dat` data frame was recorded. Also, define `sprint.times` to be the `Time` column of the `sprint.dat` data frame. Plot `sprint.times` versus `sprint.years`, using empty black circles. Label the x-axis "Year" and the y-axis "Time (seconds)". Title the plot "Fastest men's 100m sprint times". Overlaid on top, plot the times versus years for Jamaican atheletes only, using small filled green circles. Use a legend to differentiate between the empty black circles (overall times) and small filled green circles (Jamaican times). 
+
+```{r}
+#Rest defined by above code chunk.
+sprint.times <- sprint.dat$Time
+
+plot(sprint.years, sprint.times, 
+     pch = 1, col = 1, 
+     xlab = "Year", ylab = "Time (seconds)", 
+     main = "Fastest men's 100m sprint times")
+sprint.years.jam <- sprint.years[sprint.dat$Country == "JAM"]
+sprint.times.jam <- sprint.times[sprint.dat$Country == "JAM"]
+points(sprint.years.jam, sprint.times.jam, 
+       pch = 20, col = 3)
+
+legend("bottomleft", 
+       legend = c("Other", "Jamaican"), 
+       pch = c(1, 20), 
+       col = c(1, 3))
+```
+
+- **5d.** Starting with your solution code from the last question, modify it so that, instead of the Jamaican times as small filled green circles, your plot shows the US times as small filled red circles. Modify the legend appropriately too. Comment on any differences you see between the resulting plot and the one from the last question.
+
+```{r}
+plot(sprint.years, sprint.times, 
+     pch = 1, col = 1, 
+     xlab = "Year", ylab = "Time (seconds)", 
+     main = "Fastest men's 100m sprint times")
+sprint.years.usa <- sprint.years[sprint.dat$Country == "USA"]
+sprint.times.usa <- sprint.times[sprint.dat$Country == "USA"]
+points(sprint.years.usa, sprint.times.usa, 
+       pch = 20, col = 2)
+
+legend("bottomleft", 
+       legend = c("Other", "USA"), 
+       pch = c(1, 20), 
+       col = c(1, 2))
+
+```
+
+Answer: The USA times tended to be slower, and were more spread out over the years, but there were simply more of them, while the Jamaican times were among the absolute best, and were concentrated past the second half of the 2000's. 
+
+Maungawhau volcano and heatmaps
+===
+
+- **6a.** The `volcano` object in R is a matrix of dimension 87 x 61. It is a digitized version of a topographic map of the Maungawhau volcano in Auckland, New Zealand. Plot a heatmap of the volcano, with 25 colors from the terrain color palette. 
+
+```{r}
+image(volcano, col = terrain.colors(25))
+```
+
+- **6b.** Each row of `volcano` corresponds to a grid line running east to west. Each column of `volcano` corresponds to a grid line running south to north. Define a matrix `volcano.rev` by reversing the order of the rows, as well as the order of the columns, of `volcano`. Therefore, each row `volcano.rev` should now correspond to a grid line running west to east, and each column of `volcano.rev` a grid line running north to south. 
+
+```{r}
+volcano.rev <- matrix(rev(volcano), nrow =  87)
+# Should I have done it with multiple calls to apply? Those calls didnt' seem 
+# to work for me, so I reverted to this somewhat jenky way of doing it.
+#volcano.rev.apply <- apply(volcano, 2, rev)
+#volcano.rev.apply <- apply(volcano.rev.apply, 1, rev)
+```
+
+- **6c.** If we printed out the matrix `volcano.rev` to the console, then the elements would follow proper geographic order: left to right means west to east, and top to bottom means north to south. Now, produce a heatmap of the volcano that follows the same geographic order. Hint: recall that the `image()` function rotates a matrix 90 degrees counterclockwise before displaying it; and recall the function `clockwise90()` from the lecture, which you can copy and paste into your code here. Label the x-axis "West --> East", and the y-axis "South --> North". Title the plot "Heatmap of Maungawhau volcano".
+
+```{r}
+# Taken from 36-350 course notes on a lecture given by Kevin Lin
+clockwise90 = function(a) { t(a[nrow(a):1,]) }
+
+image(clockwise90(volcano.rev), 
+      xlab = "West --> East", 
+      ylab = "South --> North", 
+      main = "Heatmap of Maungawhau volcano")
+
+#image(clockwise90(volcano.rev.apply))
+```
+
+
+- **6d.** Reproduce the previous plot, and now draw contour lines on top of the heatmap.
+
+```{r}
+image(clockwise90(volcano.rev), 
+      xlab = "West --> East", 
+      ylab = "South --> North", 
+      main = "Heatmap of Maungawhau volcano")
+
+contour(clockwise90(volcano.rev), add = TRUE)
+```
+
+- **6e.** The function `filled.contour()` provides an alternative way to create a heatmap with contour lines on top. It uses the same orientation as `image()` when plotting a matrix. Use `filled.contour()` to plot a heatmap of the volcano, with (light) contour lines automatically included. Make sure the orientation of the plot matches proper geographic orientation, as in the previous question. Use a color scale of your choosing, and label the axes and title the plot appropriately. It will help to consult the documentation for `filled.contour()`.
+
+```{r}
+filled.contour(clockwise90(volcano.rev),
+               main = "Filled contour plot of Maungawhau volcano", 
+               xlab = "West --> East", 
+               ylab = "South --> North", 
+               color.palette = topo.colors)
+```

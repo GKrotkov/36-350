@@ -1,0 +1,360 @@
+---
+title: "Homework 8: Fitting Models to Data"
+author: "Statistical Computing, 36-350"
+date: "Week of Monday July 23, 2018"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, autodep=TRUE, cache.comments=TRUE)
+```
+
+Name: Gabriel Krotkov
+Andrew ID: gkrotkov
+Collaborated with: Steve Kim
+
+Reading in, exploring wage data
+===
+
+- **1a.** A data table of dimension 3000 x 11, containing demographic and economic variables measured on individuals living in the mid-Atlantic region, is up at https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/wage.csv. (This has been adapted from the book [An Introduction to Statistical Learning](http://www-bcf.usc.edu/~gareth/ISL/).) Load this data table into your R session with `read.csv()` and save the resulting data frame as `wage.df`. Check that `wage.df` has the right dimensions, and display its first 3 rows. Hint: the first several lines of the linked file just explain the nature of the data; open up the file (either directly in your web browser or after you download it to your computer), and count how many lines must be skipped before getting to the data; then use an appropriate setting for the `skip` argument to `read.csv()`.
+
+```{r}
+url <- "https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/wage.csv"
+wage.df <- read.csv(url, skip = 15, header = TRUE)
+
+cat("Dimension check, expect TRUE TRUE:\n")
+dim(wage.df) == c(3000, 11)
+head(wage.df, 3)
+```
+
+- **1b.** Identify all of the factor variables in `wage.df`, set up a plotting grid of appropriate dimensions, and then plot each of these factor variables, with appropriate titles. What do you notice about the distributions?
+
+```{r}
+cat("Printing out the structure of wage.df, which I will use to identify factors")
+cat("\n ---------------------------------------------- \n")
+str(wage.df)
+cat("----------------------------------------------- \n")
+
+par(mfrow = c(3, 3))
+for(i in 1:ncol(wage.df)){
+  if(is.factor(wage.df[,i])){
+    hist(as.numeric(wage.df[,i]), col = "purple", 
+         main = paste("Histogram",colnames(wage.df)[i], sep = " "), 
+         xlab = colnames(wage.df)[i])
+  }
+}
+``` 
+
+Linear regression modeling
+===
+
+- **2a.** Fit a linear regression model, using `lm()`, with response variable `wage` and predictor variables `year` and `age`, using the `wage.df` data frame. Call the result `wage.lm`. Display the coefficient estimates, using `coef()`, for `year` and `age`. Do they have the signs you would expect, i.e., can you explain their signs? Display a summary, using `summary()`, of this linear model. Report the standard errors and p-values associated with the coefficient estimates for `year` and `age`. Do both of these predictors appear to be significant, based on their p-values?
+
+```{r}
+wage.lm <- lm(wage ~ year + age, data = wage.df)
+
+coef(wage.lm)
+cat("-------------------------------------\n")
+summary(wage.lm)
+```
+
+Answer: They signs are as expected; positive because both covariates have a positive relationship with wage - it makes intuitive sense.
+Values for year:
+  Standard Error: 0.3685
+  p: 0.00118
+Values for age:
+  Standard Error: 0.0647
+  p: approx. 2 * 10^-16
+
+- **2b.** Save the standard errors of `year` and `age` into a vector called `wage.se`, and print it out to the console. Don't just type the values in you see from `summary()`; you need to determine these values programmatically. Hint: define `wage.sum` to be the result of calling `summary()` on `wage.lm`; then figure out what kind of R object `wage.sum` is, and how you can extract the standard errors.
+
+```{r}
+wage.sum <- summary(wage.lm)
+startInd <- (nrow(wage.sum$coefficients) + 1)
+endInd <- 2*nrow(wage.sum$coefficients)
+wage.se <- wage.sum$coefficients[startInd:endInd]
+```
+
+- **2c.** Plot diagnostics of the linear model fit in the previous question, using `plot()` on `wage.lm`. Look at the "Residuals vs Fitted", "Scale-Location", and "Residuals vs Leverage" plots---are there any groups of points away from the main bulk of points along the x-axis? Look at the "Normal Q-Q" plot---do the standardized residuals lie along the line $y=x$? Note: don't worry too if you're generally unsure how to interpret these diagnostic plots; you'll learn a lot more in your Modern Regression 36-401 course; for now, you can just answer the questions we asked. **Challenge**: what is causing the discrepancies you are (should be) seeing in these plots? Hint: look back at the histogram of the `wage` column you plotted above. 
+
+```{r}
+plot(wage.lm)
+```
+
+Answer: The normal Q-Q plot is wildly indicative of nonnormality, and the residual plots all indicate nonlinearity. 
+
+- **2e.** Use your fitted linear model `wage.lm` to predict: (a) what a 30 year old person should be making this year; (b) what President Trump should be making this year; (c) what you should be making 5 years from now. Comment on the results---which do you think is the most accurate prediction?
+
+```{r}
+
+cat("A 30-year old should be making approximately:\n", 
+    predict(wage.lm, newdata = data.frame(year = 2018, age = 30)), "\n")
+
+cat("President Trump should be making approximately:\n", 
+     predict(wage.lm, newdata = data.frame(year = 2018, age = 72)), "\n")
+
+cat("In five years, I should make approximately:\n", 
+     predict(wage.lm, newdata = data.frame(year = 2023, age = 24)), "\n")
+```
+
+Based on the assumption exploration, prediction (a) is likely to be the most accurate.
+
+Logistic regression modeling
+===
+
+- **3a.** Fit a logistic regression model, using `glm()` with `family="binomial"`, with the response variable being the indicator that `wage` is larger than 250, and the predictor variables being `year` and `age`. Call the result `wage.glm`. Note: you can set this up in two different ways: (i) you can manually define a new column (say) `wage.high` in the `wage.df` data frame to be the indicator that the `wage` column is larger than 250; or (ii) you can define an indicator variable "on-the-fly" in the call to `glm()` with an appropriate usage of `I()`. Display a summary, reporting the coefficient estimates for `year` and `age`, their standard errors, and associated p-values. Are the predictors `year` and `age` both significant?
+
+```{r}
+wage.glm <- glm(I(wage.df$wage > 250) ~ year + age, 
+                data = wage.df, family = "binomial")
+
+summary(wage.glm)
+```
+
+Answer: In this regression `year` is not significant, but `age` is.
+
+- **3b.** Refit a logistic regression model with the same response variable as in the last question, but now with predictors `year`, `age`, and `education`. Note that the third predictor is stored as a factor variable, which we call a **categorical variable** (rather than a continuous variable, like the first two predictors) in the context of regression modeling. Display a summary. What do you notice about the predictor `education`: how many coefficients are associated with it in the end? **Challenge**: can you explain why the number of coefficients associated with `education` makes sense?
+
+```{r}
+wage.glm <- glm(I(wage.df$wage > 250) ~ year + age + education, 
+                data = wage.df, family = "binomial")
+summary(wage.glm)
+```
+
+Answer: The `education` variable is broken into 4 different indicators comparing to a baseline. This number makes sense because there are 5 levels of `education`, so we need four binary variables to represent all possible levels of the categorical variable. Notable that `education` doesn't seem to be predictive at all!
+
+- **3c.** In general, one must be careful fitting a logistic regression model on categorial predictors. In order for logistic regression to make sense, for each level of the categorical predictor, we should have observations at this level for which the response is 0, and observations at this level for which the response is 1. In the context of our problem, this means that for each level of the `education` variable, we should have people at this education level that have a wage less than or equal to 250, and also people at this education level that have a wage above 250. Which levels of `education` fail to meet this criterion? Let's call these levels "incomplete", and the other levels "complete".
+
+```{r}
+# Initialize my variables
+wage.df$wage_indicator <- as.numeric(wage.df$wage > 250)
+completion_mat <- matrix(0, 5, 3)
+rownames(completion_mat) <- levels(wage.df$education)
+colnames(completion_mat) <- c("Low Wage", "High Wage", "Completion")
+
+# Detect whether instances occur in each category
+for(i in 1:nrow(completion_mat)){
+  level <- wage.df$education == levels(wage.df$education)[i]
+  completion_mat[i, 1] <- (sum(wage.df[level,ncol(wage.df)] == 0) > 0)
+  completion_mat[i, 2] <- (sum(wage.df[level,ncol(wage.df)] == 1) > 0)
+}
+
+completion_mat[,3] <- completion_mat[,1] * completion_mat[,2]
+completion <- completion_mat[,3]
+
+```
+
+- **3d.** Refit the logistic regression model as in Q3b, with the same response and predictors, but now throwing out all data in `wage.df` that corresponds to the incomplete education levels (equivalently, using only the data from the complete education levels). Display a summary, and comment on the differences seen to the summary for the logistic regression model fitted in Q3b. Did any predictors become more significant, according to their p-values?
+
+```{r}
+wage.filtered <- wage.df[completion[wage.df$education] > 0,]
+wage.glm.filtered <- glm((wage.filtered$wage > 250) ~ year + age + education, 
+                         data = wage.filtered, 
+                         family = "binomial")
+
+summary(wage.glm.filtered)
+```
+
+Answer: All of the education predictors became more significant, and the significance of the other (quantitative) variables did not change.
+
+Debt data set
+===
+
+Gross domestic product (GDP) is a measure of the total market value of all goods and services produced in a given country in a given year. The percentage growth rate of GDP in year $t$ is 
+    $$
+      100 \cdot \left(\frac{GDP_{t+1} - GDP_{t}}{GDP_{t}}\right) - 100
+    $$
+    (This formula is not important for your homework, it is just given by way of background.) An important claim in economics is that the rate of GDP growth is closely related to the level of government debt, specifically with the ratio of the government's debt to the GDP. 
+    
+Data on GDP growth and the debt-to-GDP ratio for twenty countries around the world, between the 1940s to 2010, is available at https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/debt.csv. Note that not every country has data for the same years, and some years in the middle of the period are missing data for some countries but not others. 
+
+Average GDP growth rates
+===
+
+- **4a.** Read this data into your R session, call the resulting data frame `debt.df`, check that it has dimension 1171 x 4, and display its first 4 rows. 
+
+```{r}
+url <- "https://raw.githubusercontent.com/linnylin92/36-350_public/master/dat/debt.csv"
+debt.df <- read.csv(url)
+
+cat("Dimension check, expect TRUE TRUE:\n")
+dim(debt.df) == c(1171, 4)
+head(debt.df, 4)
+```
+
+- **4b.** Load the `plyr` package into your R session with `library(plyr)`. Use `daply()` to calculate the average GDP growth rate for each country in `debt.df` (averaging over years). Then use `ddply()` and `dlply()` to calculate the same results, but just in different formats. Do not display the entire output of the calls to `ddply()` and `dlply()`; just display the first 5 rows/elements.
+
+```{r}
+library(plyr)
+
+avg_gdp_growth <- function(country){
+  return(mean(country$growth))
+}
+
+head(daply(debt.df, .(Country), avg_gdp_growth), 5)
+head(ddply(debt.df, .(Country), avg_gdp_growth), 5)
+head(dlply(debt.df, .(Country), avg_gdp_growth), 5)
+```
+
+- **4c.** Show how the same result as in the last question can be computed with one of the built-in apply functions in R.
+
+```{r}
+tapply(debt.df$growth, debt.df$Country, mean)
+```
+
+- **4d.** Now use `daply()` to calculate average GDP growth rate for each year in `debt.df` (averaging over countries). Check that the average growth rates for 1972 and 1989 are 5.629986 and 3.186842, respectively. Then, plot the average growth rate versus the year. Label the axes and title the plot appropriately. What does the general trend appear to be?
+
+```{r}
+growth_by_year <- daply(debt.df, .(Year), avg_gdp_growth)
+
+cat("Correctness check, expect 5.629986, 3.186842:\n")
+growth_by_year[c("1972", "1989")]
+
+plot(names(growth_by_year), growth_by_year, 
+     main = "Average GDP growth by year", 
+     xlab = "Year", ylab = "Average GDP growth")
+```
+
+Answer: The general trend appears to be slight negative slope.
+
+- **Challenge.** Using just one line of code, in which you call one of the `d*ply()` functions, create a matrix whose entries are GDP growth by year (rows) and country (columns). Check that it has dimension 64 x 20. Show the first 6 rows and 6 columns.
+
+```{r}
+result <- daply(debt.df, .(Year, Country), avg_gdp_growth)
+dim(result)
+head(result, 6)
+tail(result, 6)
+```
+
+Calculating standard errors
+===
+
+- **5a.** In a plot like that from Q4d, we might ask: how certain are we of individual yearwise averages? To address this, it is useful to plot "error bars" on top of each average. To this end, calculate the standard error of the average GDP growth rates for each year in `debt.df`. To be precise, if $\bar{x}$ is the average of numbers $x_1,\ldots,x_n$, then the standard error of $\bar{x}$ is defined to be $\hat\sigma/\sqrt{n}$, where $\hat\sigma$ is the standard deviation of $x_1,\ldots,x_n$. Your calculation of standard errors should use one of the `plyr` functions, e.g., no `for()` loops allowed. Check that the standard errors for 1972 and 1989 are 0.5440091 and 0.3912434, respectively.
+
+```{r}
+year_se <- daply(debt.df, .(Year),
+                 function(year){
+                   return((sd(year$growth)) / sqrt(nrow(year)))
+                 })
+
+cat("Correctness check, expect 0.5440091, 0.3912434:\n")
+year_se[c("1972", "1989")]
+```
+
+- **5b.** Reproduce your plot from Q4d of average GDP growth rates versus years in `debt.df` but now on top of each point---denoting an average growth rate for a particular year---draw a vertical line segment through this point, extending from the average growth rate minus one standard error to the average growth rate plus one standard error. Hint: use `segments()`. Make sure that these line segments do not extend past the y limits on your plot.
+
+
+```{r}
+plot(names(growth_by_year), growth_by_year, 
+     main = "Average GDP growth by year", 
+     xlab = "Year", ylab = "Average GDP growth", 
+     ylim = c((min(growth_by_year) - max(year_se)), 
+              (max(growth_by_year) + max(year_se))))
+segments(as.numeric(names(year_se)), (growth_by_year - year_se), 
+         as.numeric(names(year_se)), (growth_by_year + year_se), 
+         col = "red")
+```
+
+Economists: which ones are right?
+===
+
+- **6a.** Some economists claim that high levels of government debt leads to slower growth. Other economists claim that low economic growth just propagates forward. The debt data lets us relate (say) this year's debt to this year's growth rate; but to investigate economists' claims, we need to relate this year's debt to next year's growth. First, create a new data frame `debt.df.france` which contains just the rows of `debt.df` for France. Check that it has dimension 54 rows and 4 columns, and display its first 5 rows.
+
+```{r}
+debt.df.france <- debt.df[debt.df$Country == "France",]
+cat("Dimension check, expect TRUE TRUE:\n")
+dim(debt.df.france) == c(54, 4)
+
+head(debt.df.france, 5)
+```
+
+- **6b.** Create a new column in `debt.df.france`, called `next.growth`, which gives next year's growth if the next year is in the data frame, or NA if the next year is missing. Make sure that your construction of the `next.growth` column is entirely programmatic, i.e., nothing "by hand", so you should be determining programmatically if the next year is in the data frame. Hint: you may rely on the fact that the rows of the data frame are sorted by years. To check your answers, `next.growth` for 1971 should be 5.885827, but for 1972 it should be NA. 
+
+```{r}
+debt.df.france$next.growth <- vector(length = nrow(debt.df.france))
+for(i in 1:nrow(debt.df.france)){
+  if(i == nrow(debt.df.france)){
+    debt.df.france$next.growth[i] <- NA
+  }
+  else{
+    if(debt.df.france$Year[i] + 1 == debt.df.france$Year[i+1]){
+      debt.df.france$next.growth[i] <- debt.df.france$growth[i + 1]
+    }
+    else{
+       debt.df.france$next.growth[i] <- NA
+    }
+  }
+}
+
+cat("Check next.growth, expect 5.885827, NA:\n")
+debt.df.france[debt.df.france$Year == 1971,ncol(debt.df.france)]
+debt.df.france[debt.df.france$Year == 1972,ncol(debt.df.france)]
+```
+    
+- **6c.** Add a `next.growth` column, as you did in the last question, but now to the whole `debt.df` data frame. Hint: write a function to encapsulate what you did in the last question, and then use `ddply()`. Show the first 3 and last 3 rows of the modified `debt.df` data frame.
+
+```{r}
+concatenate_next_growth <- function(df){
+  df$next.growth <- vector(length = nrow(df))
+  for(i in 1:nrow(df)){
+    if(i == nrow(df)){
+      df$next.growth[i] <- NA
+    }
+    else{
+      if(df$Year[i] + 1 == df$Year[i+1]){
+        df$next.growth[i] <- df$growth[i + 1]
+      }
+      else{
+       df$next.growth[i] <- NA
+      }
+    }
+  }
+  return(df)
+}
+
+debt.df <- ddply(debt.df, .(Country), concatenate_next_growth)
+
+head(debt.df, 3)
+tail(debt.df, 3)
+```
+
+- **6d.** Plot next year's GDP growth against this year's debt ratio, over all the data in `debt.df`, with appropriate axes labels and an appropriate title. Report the coefficients from regressing next year's growth rate on the current year's debt ratio, again over all the data in `debt.df`. Add this regression line to your plot. Then (separately) plot next year's GDP growth against the current year's GDP growth. Similarly, report the coefficients from regressing next year's growth rate onto this year's growth rate, and add this regression line to your plot. Can you tell, from comparing the latter two regressions, whether current growth or current debt is a better predictor of future growth?
+
+```{r}
+plot(debt.df$ratio, debt.df$next.growth,
+     main = "Debt ratio vs next year's growth", 
+     xlab = "Debt Ratio", ylab = "Next growth")
+
+debt.lm <- lm(next.growth ~ ratio, data = debt.df)
+abline(debt.lm, col = "red")
+
+cat("Coefficients of the debt linear regression")
+coef(debt.lm)
+```
+
+```{r}
+plot(debt.df$growth, debt.df$next.growth,
+     main = "Current growth vs next year's growth", 
+     xlab = "Current growth", ylab = "Next growth")
+
+growth.lm <- lm(next.growth ~ growth, data = debt.df)
+cat("Coefficients of the growth linear regression")
+coef(growth.lm)
+abline(growth.lm, col = "green")
+```
+
+Answer: Debt appears to have an almost-zero slope correlating it to next year's growth, while last year's growth is more aggressively related. Exploring r^2 values and p-values would be valuable for further insight, but based on just this information last year's growth appears to be the better predictor.
+
+- **Challenge.** Add a new column called  `delta.growth` to the `debt.df` data frame, giving the difference between next year's GDP growth rate and this year's GDP growth rate. Then, report the coefficients from regressing the change in GDP growth on the current GDP growth rate and the current debt-to-GDP ratio, over all the data in `debt.df`.
+
+    Some economists have claimed that there is a "tipping point", or even a "point of no return", when the ratio of government debt-to-GDP crosses 90\%, above which growth slows dramatically or even becomes negative. Add an indicator column `high.debt` to the `debt.df` data frame, that takes the value TRUE when the debt-to-GDP ratio is over 90\% and FALSE otherwise. Now regress the change in GDP growth on the current GDP growth rate, the current debt-to-GDP ratio, as well as the indicator that the debt is above 90\%. Report the coefficients. What does the coefficient of the indicator variable `high.debt` tell you about the claim?
+
+```{r}
+debt.df$delta.growth <- debt.df$next.growth - debt.df$growth
+debt.df$high.debt <- debt.df$ratio > 90
+
+tipping_point_lm <- lm(delta.growth ~ growth + ratio + high.debt, 
+                       data = debt.df)
+coef(tipping_point_lm)
+```
+
+Answer: The coefficient of the `high.debt` variable indicates that, if there is an effect relating the >90% debt indicator variable with the `growth` response (valuable to investigate p-value to explore that), that it amounts to approximately .65 units of `delta.growth` in total on average. 
