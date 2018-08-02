@@ -5,7 +5,12 @@ generate_data <- function(n, p){
               responses = resp))
 }
 
-model_select(covariates, responses, cutoff){
+model_select <- function(covariates, responses, cutoff = 0.05){
   lmodel <- lm(responses ~ covariates)
-  
+  coeffs <- summary(lmodel)$coefficients
+  rows <- nrow(coeffs)
+  cols <- ncol(coeffs)
+  select <- coeffs[((rows * (cols - 1)) + 1):(rows * cols)] <= cutoff
+  refit <- lm(responses ~ covariates[, select])
+  return(summary(refit)$coefficients)
 }

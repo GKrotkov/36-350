@@ -84,8 +84,8 @@ username and "repo" is your repo's name.
     which is a vector of length n of draws from the standard normal.
 
 
-- **2b.** Write a function `model_select(covariates, responses,
-    cutoff)` which fits the linear regression `responses ~ covariates`
+- **2b.** Write a function `model_select(covariates, responses, cutoff)`
+    which fits the linear regression `responses ~ covariates`
     and retains only those covariates whose coefficient p-values are
     less than or equal to `cutoff`. Then fit another regression using
     only the retained covariates and return the p-values from this
