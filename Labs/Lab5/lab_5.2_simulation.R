@@ -11,6 +11,12 @@ model_select <- function(covariates, responses, cutoff = 0.05){
   rows <- nrow(coeffs)
   cols <- ncol(coeffs)
   select <- coeffs[((rows * (cols - 1)) + 1):(rows * cols)] <= cutoff
-  refit <- lm(responses ~ covariates[, select])
+  # -1 removes the constant term
+  browser()
+  newCov <- covariates[, select[-1]]
+  if(ncol(newCov) == 0){
+    return(vector())
+  }
+  refit <- lm(responses ~ newCov)
   return(summary(refit)$coefficients)
 }
