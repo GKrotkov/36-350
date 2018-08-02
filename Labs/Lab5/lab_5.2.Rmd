@@ -57,7 +57,9 @@ readLines("https://raw.githubusercontent.com/GKrotkov/36-350/master/README.md")
     everything works, "Hello, world!" should appear.
 
 ```{r}
-
+library(devtools)
+url <- "https://raw.githubusercontent.com/GKrotkov/36-350/master/Labs/Lab5/hello_world.R"
+source_url(url)
 ```
 
 Git in Practice
