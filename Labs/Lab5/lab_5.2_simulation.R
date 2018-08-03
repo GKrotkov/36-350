@@ -8,12 +8,10 @@ generate_data <- function(n, p){
 model_select <- function(covariates, responses, cutoff = 0.05){
   lmodel <- lm(responses ~ covariates)
   coeffs <- summary(lmodel)$coefficients
-  rows <- nrow(coeffs)
-  cols <- ncol(coeffs)
-  select <- coeffs[((rows * (cols - 1)) + 1):(rows * cols)] <= cutoff
+  select <- coeffs[,ncol(coeffs)] <= cutoff
   # -1 removes the constant term
+  newCov <- matrix(covariates[, select[-1]])
   browser()
-  newCov <- covariates[, select[-1]]
   if(ncol(newCov) == 0){
     return(vector())
   }
