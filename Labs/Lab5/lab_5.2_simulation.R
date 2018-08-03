@@ -27,5 +27,19 @@ run_simulation <- function(n_trials, n, p, cutoff = 1){
                                      data$responses, 
                                      cutoff = cutoff))
   }
+  pdf(file = paste("Result", n, p, n_trials, ".pdf", sep = ""), 
+      width = 10, height = 10)
   hist(result)
+  graphics.off()
+}
+
+dir <- "/Users/Gabriel/Desktop/Notes\ Projects/Statistics/Statistical\ Computing/Labs/Lab5/Histograms"
+setwd(dir)
+
+for(i in 1:3){
+  n_trials <- 1000
+  n <- c(100, 1000, 10000)
+  p <- c(10, 20, 50)
+  run_simulation(n_trials = n_trials, n = n[i], p = p[i], cutoff = 0.05)
+  
 }
