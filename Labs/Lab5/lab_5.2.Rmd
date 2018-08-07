@@ -1,5 +1,5 @@
 ---
-title: "Lab 12: Version Control and Workflow"
+title: "Lab 5.2: Version Control and Workflow"
 author: "Statistical Computing, 36-350"
 date: "Week of Thursday August 2, 2018"
 ---
@@ -83,6 +83,10 @@ username and "repo" is your repo's name.
     of draws from the standard normal distribution, and `responses`
     which is a vector of length n of draws from the standard normal.
 
+```{r}
+readLines("https://raw.githubusercontent.com/GKrotkov/36-350/f84fa1df0c25f5268298652e44472951d9206b3d/Labs/Lab5/lab_12_simulation.R")
+```
+
 
 - **2b.** Write a function `model_select(covariates, responses, cutoff)`
     which fits the linear regression `responses ~ covariates`
@@ -94,6 +98,9 @@ username and "repo" is your repo's name.
     `lm(responses ~ covariates[, c(1, 2)])` will fit a regression with
     only the first two covariates.
 
+```{r}
+readLines("https://raw.githubusercontent.com/GKrotkov/36-350/e50fb34de802da17ca292297a0ea2a9eaec6be7b/Labs/Lab5/lab_5.2_simulation.R")
+```
 
 - **2c.** Write a function `run_simulation(n_trials, n, p, cutoff)`
     which uses the previous two functions to run `n_trials`
@@ -107,3 +114,12 @@ username and "repo" is your repo's name.
     `cutoff = 0.05`. Don't include the figures in the commit, only the
     code. *HINT*: Write a `for` loop; alternatively the functions
     `expand.grid` and `m_ply` may prove useful.
+
+```{r}
+readLines("https://raw.githubusercontent.com/GKrotkov/36-350/86942262e1b170955db8ac7725f699df0ed27a96/Labs/Lab5/lab_5.2_simulation.R")
+```
+
+```{r}
+cat("Changed")
+```
+

@@ -41,5 +41,4 @@ for(i in 1:3){
   n <- c(100, 1000, 10000)
   p <- c(10, 20, 50)
   run_simulation(n_trials = n_trials, n = n[i], p = p[i], cutoff = 0.05)
-  
 }
